@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -30,6 +30,7 @@ export class UsersService {
     return savedUser
   }
 
+
   findAll() {
     return `This action returns all users`;
   }
@@ -47,8 +48,22 @@ export class UsersService {
   }
 
 
-  async findUserByEmail(email){
-    // return await this.userRepository.findOne({where:{email}})
-    return await this.userRepository.findOneBy({email})
+  async findUserByEmail(email: string):Promise<User | undefined>{
+    return await this.userRepository.findOneBy({email})    // return await this.userRepository.findOne({where:{email}})
+  }
+
+  async updateRefreshToken(id:number, hash:string){
+    const user = await this.userRepository.findOneBy({ id})
+    if(!user) throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
+    user.hash = hash;
+    await this.userRepository.save(user)
+  }
+
+  async logoutUser(id:number){
+    const user = await this.userRepository.findOneBy({ id})
+    if(!user) throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
+    if(user.hash == null) throw new HttpException('Operation not allowed exceptin', HttpStatus.BAD_REQUEST); 
+    user.hash = null;
+    await this.userRepository.save(user)
   }
 }

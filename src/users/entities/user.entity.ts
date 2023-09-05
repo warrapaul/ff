@@ -21,4 +21,10 @@ export class User {
 
     @UpdateDateColumn()
     updatedAt: Date;
+
+    @Column({nullable:true})
+    hash: string;
+ 
+    @Column({nullable:true})
+    hashRt: string;
 }

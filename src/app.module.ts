@@ -5,12 +5,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
 import { RolesModule } from './roles/roles.module';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { AtGuard } from './common/guards';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true
     }),
+    AuthModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host:  process.env.DATABASE_HOST,
@@ -21,11 +24,15 @@ import { ConfigModule } from '@nestjs/config';
       entities: [User],
       synchronize: true,
     }),
-    AuthModule,
     UsersModule,
     RolesModule
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AtGuard,
+    },
+  ],
 })
 export class AppModule {}
