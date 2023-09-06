@@ -12,6 +12,8 @@ export class User {
     @Column({unique: true})
     email: string;
 
+    @Column()
+    phoneNumber: string;
     
     @Column()
     password: string;
@@ -28,3 +30,9 @@ export class User {
     @Column({nullable:true})
     hashRt: string;
 }
+
+
+
+
+
+
