@@ -4,26 +4,35 @@ import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
 import { RolesModule } from './roles/roles.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './common/guards';
+import { AppConfig, DatabaseConfig } from './config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true
+      envFilePath: ['.env'], 
+      isGlobal: true, 
     }),
+    ConfigModule.forRoot({
+      envFilePath: ['.env'], 
+      isGlobal: true,
+      cache: true,
+      load: [
+        AppConfig,
+        DatabaseConfig
+        ],
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        ...configService.get('database'),
+      }),
+      inject: [ConfigService],
+    }),
+    
     AuthModule,
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host:  process.env.DATABASE_HOST,
-      port: Number( process.env.DATABASE_PORT,),
-      username: process.env.DATABASE_USER,
-      password:  process.env.DATABASE_PASSWORD,
-      database:  process.env.DATABASE_NAME,
-      entities: [User],
-      synchronize: true,
-    }),
     UsersModule,
     RolesModule
   ],
@@ -35,4 +44,6 @@ import { AtGuard } from './common/guards';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  
+}
