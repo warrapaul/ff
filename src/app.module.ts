@@ -6,8 +6,9 @@ import { User } from './users/entities/user.entity';
 import { RolesModule } from './roles/roles.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { AtGuard } from './common/guards';
+import { JwtGuard } from './common/guards';
 import { AppConfig, DatabaseConfig } from './config';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
@@ -34,13 +35,14 @@ import { AppConfig, DatabaseConfig } from './config';
     
     AuthModule,
     UsersModule,
-    RolesModule
+    RolesModule,
+    PostsModule
   ],
   controllers: [],
   providers: [
     {
       provide: APP_GUARD,
-      useClass: AtGuard,
+      useClass: JwtGuard,
     },
   ],
 })

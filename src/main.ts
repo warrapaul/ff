@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { AtGuard } from './common/guards';
+import { JwtGuard } from './common/guards';
 import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
