@@ -35,15 +35,15 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     return await this.userRepository.findOne({where:{id}})
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
+  update(id: string, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} user`;
   }
 
@@ -52,14 +52,14 @@ export class UsersService {
     return await this.userRepository.findOneBy({email})    // return await this.userRepository.findOne({where:{email}})
   }
 
-  async updateRefreshToken(id:number, hash:string){
+  async updateRefreshToken(id:string, hash:string){
     const user = await this.userRepository.findOneBy({ id})
     if(!user) throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
     user.hash = hash;
     await this.userRepository.save(user)
   }
 
-  async logoutUser(id:number){
+  async logoutUser(id:string){
     const user = await this.userRepository.findOneBy({ id})
     if(!user) throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
     if(user.hash == null) throw new HttpException('Operation not allowed exceptin', HttpStatus.BAD_REQUEST); 

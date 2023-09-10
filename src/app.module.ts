@@ -9,13 +9,11 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './common/guards';
 import { AppConfig, DatabaseConfig } from './config';
 import { PostsModule } from './posts/posts.module';
+import { PermissionsModule } from './permissions/permissions.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: ['.env'], 
-      isGlobal: true, 
-    }),
+    
     ConfigModule.forRoot({
       envFilePath: ['.env'], 
       isGlobal: true,
@@ -36,7 +34,8 @@ import { PostsModule } from './posts/posts.module';
     AuthModule,
     UsersModule,
     RolesModule,
-    PostsModule
+    PostsModule,
+    PermissionsModule
   ],
   controllers: [],
   providers: [

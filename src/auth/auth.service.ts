@@ -33,12 +33,12 @@ export class AuthService {
       return tokens;
     }
 
-    async logout(id: number){
+    async logout(id: string){
        await this.userService.logoutUser(id);
        return true;
     }
 
-    async refreshToken(id:number, refreshToken:string){
+    async refreshToken(id:string, refreshToken:string){
       const user = await this.userService.findOne(id);
       if(!user) throw new ForbiddenException('Access Denied');
 
@@ -50,7 +50,7 @@ export class AuthService {
     }
    
 
-    async generateToken(userId: number, email:string){
+    async generateToken(userId: string, email:string){
       const [accessToken, refreshToken] = await Promise.all([
         this.jwtService.signAsync({
           sub:userId,
@@ -58,7 +58,7 @@ export class AuthService {
         },
         {
           secret:process.env.JWT_TOKEN_KEY,
-          expiresIn:60*15,
+          expiresIn:60*60*15,
         }),
         this.jwtService.signAsync({
           sub:userId,
@@ -66,7 +66,7 @@ export class AuthService {
         },
         {
           secret:process.env.JWT_REFRESH_TOKEN_KEY,
-          expiresIn:60*15,
+          expiresIn:60*60*15,
         })
       ])
 

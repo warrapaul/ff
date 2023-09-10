@@ -2,7 +2,7 @@ import { createParamDecorator,ExecutionContext, Injectable } from "@nestjs/commo
 import { JwtPayload } from "src/auth/types";
 
 export const GetCurrentUserId = createParamDecorator(
-    (_: undefined, context: ExecutionContext): number => {
+    (_: undefined, context: ExecutionContext): string => {
       const request = context.switchToHttp().getRequest();
       const user = request.user as JwtPayload;
       return user.sub;

@@ -12,7 +12,7 @@ export class CreateUserDto {
    @IsNotEmpty()
    @IsString()
    @MaxLength(15)
-   @MinLength(10)
+   @MinLength(9)
    phoneNumber: string;
 
    @IsNotEmpty()
