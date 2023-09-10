@@ -10,6 +10,7 @@ import { JwtGuard } from './common/guards';
 import { AppConfig, DatabaseConfig } from './config';
 import { PostsModule } from './posts/posts.module';
 import { PermissionsModule } from './permissions/permissions.module';
+import { SeedModule } from './database/seeds/seed.module';
 
 @Module({
   imports: [
@@ -35,7 +36,8 @@ import { PermissionsModule } from './permissions/permissions.module';
     UsersModule,
     RolesModule,
     PostsModule,
-    PermissionsModule
+    PermissionsModule,
+    SeedModule
   ],
   controllers: [],
   providers: [

@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { UserAccStatusEnum } from "../enums";
 
 export class CreateUserDto {
    @IsNotEmpty()
@@ -14,6 +15,10 @@ export class CreateUserDto {
    @MaxLength(15)
    @MinLength(9)
    phoneNumber: string;
+
+   @IsOptional()
+   @IsEnum(UserAccStatusEnum)
+   status: string;
 
    @IsNotEmpty()
    @MinLength(4)

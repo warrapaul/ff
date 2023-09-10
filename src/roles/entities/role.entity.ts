@@ -1,12 +1,10 @@
+import { ProjBaseEntity } from "src/common/entity/base-entity";
 import { Permission } from "src/permissions/entities/permission.entity";
 import { User } from "src/users/entities/user.entity";
 import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Role {
-    @PrimaryGeneratedColumn()
-    id: number;
-
+export class Role  extends ProjBaseEntity{
     @Column({unique:true})
     name: string;
 
@@ -22,4 +20,7 @@ export class Role {
 
     @OneToMany(()=>User, (user)=>user.role)
     users:User[];
+
+    @Column()
+    test:number;
 }

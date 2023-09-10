@@ -1,6 +1,5 @@
 import { IsArray, IsEnum, IsIn, IsNotEmpty, IsOptional, IsString } from "class-validator";
-import { PostStatus } from "../enums/post-status.enum";
-import { PostCategory } from "../enums/post-category.enum";
+import { PostCategoryEnum, PostStatusEnum } from "../enums";
 
 export class CreatePostDto {
     @IsNotEmpty()
@@ -9,12 +8,12 @@ export class CreatePostDto {
 
     @IsOptional()
     @IsString()
-    @IsEnum(PostStatus)
+    @IsEnum(PostStatusEnum)
     status: string;
 
     @IsArray()
-    @IsEnum(PostCategory, {each:true})
-    category: PostCategory[]
+    @IsEnum(PostCategoryEnum, {each:true})
+    category: PostCategoryEnum[]
 
     @IsString()
     description: string;

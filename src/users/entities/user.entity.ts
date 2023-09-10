@@ -3,6 +3,7 @@ import { ProjBaseEntity } from "src/common/entity/base-entity";
 import { Post } from "src/posts/entities/post.entity";
 import { Role } from "src/roles/entities/role.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { UserAccStatusEnum } from "../enums";
 
 @Entity()
 export class User extends ProjBaseEntity {
@@ -15,6 +16,9 @@ export class User extends ProjBaseEntity {
     @Column()
     phoneNumber: string;
     
+    @Column({type:'enum', enum:UserAccStatusEnum, default:UserAccStatusEnum.ACTIVE})
+    status: string;
+
     @Column()
     password: string;
 

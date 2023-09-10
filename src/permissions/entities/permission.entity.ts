@@ -1,11 +1,9 @@
+import { ProjBaseEntity } from "src/common/entity/base-entity";
 import { Role } from "src/roles/entities/role.entity";
 import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Permission {
-    @PrimaryGeneratedColumn()
-    id: number;
-
+export class Permission extends ProjBaseEntity {
     @Column({unique:true})
     name: string;
 
@@ -14,4 +12,5 @@ export class Permission {
 
     @ManyToMany(()=>Role, (role)=>role.permissions)
     roles:Role[];
+
 }

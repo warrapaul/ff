@@ -1,4 +1,4 @@
-export enum PostCategory{
+export enum PostCategoryEnum{
     POLITICAL='political',
     LOCAL='local',
     CLIMATE='climate',
