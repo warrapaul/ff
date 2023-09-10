@@ -1,22 +1,24 @@
-import { registerAs } from '@nestjs/config';
+import { DataSource } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
+import { config } from 'dotenv';
 
-export default registerAs('database', () => ({
-    //npm run migration:generate --name=initial
-    //npm run migration:run
+config();
+
+const configService = new ConfigService();
+
+export default new DataSource({
   type: 'mysql',
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT, 10) || 3306,
-  username: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  synchronize: process.env.NODE_ENV === 'development',
-  logging: process.env.NODE_ENV === 'development',
-  // entities: [`${__dirname}/../**/*.entity{.ts,.js}`],
-  // migrations: [`${__dirname}/../../db/migrations/*{.ts,.js}`],
-  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
+  host: configService.get('DB_HOST'),
+  port: configService.get('DB_PORT'),
+  username: configService.get('DB_USER'),
+  password: configService.get('DB_PASSWORD'),
+  database: configService.get('DB_NAME'),
+  entities: [`${__dirname}/../../src/**/*.entity{.ts,.js}`],
+  synchronize: configService.get('nodenv') === 'development',
+  logging: configService.get('nodenv') === 'development',
+  migrations: [`${__dirname}/migrations/*{.ts,.js}`],
   migrationsTableName: 'migrations',
-}));
+});
 
 
 
