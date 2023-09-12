@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import {ConfigModule, ConfigService } from '@nestjs/config';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy, JwtRefreshStrategy } from './strategies';
+import { RoleModule } from 'src/database/seeds/role/role.module';
 
 @Module({
   imports:[
@@ -14,7 +15,8 @@ import { JwtStrategy, JwtRefreshStrategy } from './strategies';
     }),
     JwtModule.register({}),
     UsersModule, 
-    PassportModule
+    PassportModule,
+    RoleModule
 
   ],
   providers: [AuthService, JwtStrategy, JwtRefreshStrategy],

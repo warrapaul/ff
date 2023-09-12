@@ -31,8 +31,16 @@ export class UsersService {
   }
 
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    return await this.userRepository
+    .createQueryBuilder('user')
+    .leftJoinAndSelect('user.role','role')
+    .leftJoinAndSelect('role.permissions','permission')
+    .select(['user.id','user.name','user.email',
+            'role.id','role.name',
+            'permission.id','permission.name'])
+    .getMany();
+
   }
 
   async findOne(id: string) {

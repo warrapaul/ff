@@ -21,6 +21,4 @@ export class Role  extends ProjBaseEntity{
     @OneToMany(()=>User, (user)=>user.role)
     users:User[];
 
-    @Column()
-    test:number;
 }
