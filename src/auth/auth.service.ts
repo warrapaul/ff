@@ -5,12 +5,14 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { Tokens } from './types';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { RolesService } from 'src/roles/roles.service';
+import { PermissionsService } from 'src/permissions/permissions.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private userService:UsersService,
-        private jwtService:JwtService,   
+        private jwtService:JwtService,  
     ){}
 
     async signup(createUserDto: CreateUserDto):Promise<Tokens>{

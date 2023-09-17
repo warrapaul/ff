@@ -31,12 +31,43 @@ export class UsersService {
   }
 
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    return await this.userRepository
+    .createQueryBuilder('user')
+    .leftJoinAndSelect('user.role','role')
+    .leftJoinAndSelect('role.permissions','permission')
+    .select(['user.id','user.name','user.email',
+            'role.id','role.name',
+            'permission.id','permission.name'])
+    .getMany();
+
   }
 
   async findOne(id: string) {
-    return await this.userRepository.findOne({where:{id}})
+    // return await this.userRepository.findOne({
+    //   where:{id},
+    //   relations:{
+    //     role: true
+    //   }
+    // })
+    return await this.userRepository
+    .createQueryBuilder('user')
+    .where('user.id = :id', { id })
+    .leftJoinAndSelect('user.role', 'role')
+    .select([
+      'user.id',
+      'user.name',
+      'user.email',
+      'user.phoneNumber',
+      'user.status',
+      'user.password',
+      'user.hash',
+      'role.id',
+      'role.name',
+      'role.description',
+      'role.isActive',
+    ])
+    .getOne();
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {

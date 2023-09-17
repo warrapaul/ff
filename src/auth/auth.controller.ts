@@ -5,7 +5,9 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import {  RtGuard } from 'src/common/guards';
 import { GetCurrentUser, GetCurrentUserId, IsPublic } from 'src/common/decorators';
 import { Tokens } from './types';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
     constructor(

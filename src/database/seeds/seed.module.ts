@@ -8,22 +8,22 @@ import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
-//  ConfigModule.forRoot({
-//     envFilePath: ['.env'], 
-//     isGlobal: true,
-//     cache: true,
-//     load: [
-//       AppConfig,
-//       DatabaseConfig
-//       ],
-//   }),
-//   TypeOrmModule.forRootAsync({
-//     imports: [ConfigModule],
-//     useFactory: (configService: ConfigService) => ({
-//       ...configService.get('database'),
-//     }),
-//     inject: [ConfigService],
-//   }),
+ ConfigModule.forRoot({
+    envFilePath: ['.env'], 
+    isGlobal: true,
+    cache: true,
+    load: [
+      AppConfig,
+      DatabaseConfig
+      ],
+  }),
+  TypeOrmModule.forRootAsync({
+    imports: [ConfigModule],
+    useFactory: (configService: ConfigService) => ({
+      ...configService.get('database'),
+    }),
+    inject: [ConfigService],
+  }),
   PostModule, 
   RoleModule, UserModule]
 })

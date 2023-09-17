@@ -2,7 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AssignPermissionsToRoleDto } from './dto/assign-permissions-to-role.dto';
+import { AssignUserRoleDto } from './dto/assing-user-role.dto';
 
+@ApiTags('Roles and Permissions')
+@ApiBearerAuth()
 @Controller('roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
@@ -31,4 +36,18 @@ export class RolesController {
   remove(@Param('id') id: string) {
     return this.rolesService.remove(id);
   }
+
+
+  @Post('assign-permissions')
+  async assignPermissionsToRole(@Body() assignPermissionsToRoleDto:AssignPermissionsToRoleDto){
+    await this.rolesService.assignPermissionsToRole(assignPermissionsToRoleDto);
+    return { message: 'Permissions assigned successfully' };
+  }
+
+  @Post('assign-user-role')
+  async assignUserRole(@Body() assignUserRoleDto:AssignUserRoleDto){
+    await this.rolesService.assignUserRole(assignUserRoleDto);
+    return { message: 'Role assigned successfully' };
+  }
+
 }
