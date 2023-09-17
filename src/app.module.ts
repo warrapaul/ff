@@ -11,10 +11,11 @@ import { AppConfig, DatabaseConfig } from './config';
 import { PostsModule } from './posts/posts.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { SeedModule } from './database/seeds/seed.module';
+import { DevtoolsModule } from '@nestjs/devtools-integration';
+import { PermissionsGuard } from './common/guards/permissions.guard';
 
 @Module({
   imports: [
-    
     ConfigModule.forRoot({
       envFilePath: ['.env'], 
       isGlobal: true,
@@ -45,6 +46,10 @@ import { SeedModule } from './database/seeds/seed.module';
       provide: APP_GUARD,
       useClass: JwtGuard,
     },
+    {
+      provide:APP_GUARD,
+      useClass:PermissionsGuard
+    }
   ],
 })
 export class AppModule {

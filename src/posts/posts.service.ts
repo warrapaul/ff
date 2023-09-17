@@ -38,23 +38,12 @@ export class PostsService {
     
   }
 
-  async findAll(query:PaginateQuery):Promise<Paginated<Post>> {
-    return paginate(query, this.postRepository,{
-      sortableColumns:['title','category','createdAt'],
-      defaultSortBy:[['createdAt','DESC'],['title','ASC']],
-      searchableColumns:['author', 'title', 'description'],
-      select:['id','title','category','description'],
-      filterableColumns:{
-        name:[FilterOperator.EQ,FilterSuffix.NOT],
-        category:true
+  async findAll(){
+    return await this.postRepository.find({
+      relations:{
+        author:true
       }
     })
-
-    // return await this.postRepository.find({
-    //   relations:{
-    //     author:true
-    //   }
-    // })
     // return await this.postRepository
     //   .createQueryBuilder('post') //querybuilder build sql queries, post is alias of Post Entity
     //   .where('post.id = :postId', { postId: 2 }) 

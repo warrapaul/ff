@@ -4,9 +4,11 @@ import { AuthController } from './auth.controller';
 import { UsersModule } from 'src/users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import {ConfigModule, ConfigService } from '@nestjs/config';
-import { PassportModule } from '@nestjs/passport';
+import { PassportModule, PassportSerializer } from '@nestjs/passport';
 import { JwtStrategy, JwtRefreshStrategy } from './strategies';
-import { RoleModule } from 'src/database/seeds/role/role.module';
+import { RolesService } from 'src/roles/roles.service';
+import { PermissionsModule } from 'src/permissions/permissions.module';
+import { RolesModule } from 'src/roles/roles.module';
 
 @Module({
   imports:[
@@ -14,9 +16,9 @@ import { RoleModule } from 'src/database/seeds/role/role.module';
       isGlobal: true
     }),
     JwtModule.register({}),
-    UsersModule, 
     PassportModule,
-    RoleModule
+    UsersModule, 
+    RolesModule
 
   ],
   providers: [AuthService, JwtStrategy, JwtRefreshStrategy],

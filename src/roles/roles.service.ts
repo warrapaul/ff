@@ -33,7 +33,12 @@ export class RolesService {
   }
 
   async findOne(id: string): Promise<Role> {
-    return await this.rolesRepository.findOne({where:{id}});
+    return await this.rolesRepository.findOne({
+      where:{id},
+      relations:{
+        permissions:true
+      }
+    });
   }
 
   async update(id: string, updateRoleDto: UpdateRoleDto): Promise<Role | undefined> {
@@ -82,7 +87,7 @@ export class RolesService {
   async getPermissionNamesForUser(userId: string):Promise<string[]>{
     const user = await this.userRepository.findOne({
       where:{id:userId},
-      relations:{role:true}
+      relations:['role', 'role.permissions']
     });
 
     if(!user){
@@ -94,9 +99,14 @@ export class RolesService {
       throw new HttpException('Role not found',HttpStatus.BAD_REQUEST);
     }
 
+    if(!role.isActive){
+      throw new HttpException('Role is inactive',HttpStatus.BAD_REQUEST);
+    }
+
     const permissions = role.permissions;
     if(!permissions){
-      throw new HttpException('permissions not found',HttpStatus.BAD_REQUEST);
+      // throw new HttpException('permissions not found',HttpStatus.BAD_REQUEST);
+      return []
     }
 
     const permissionNames = permissions.map((permission) => permission.name);

@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Post, Patch, Param, Delete, ParseIntPipe, ParseUUIDPipe, Query } from '@nestjs/common';
+import { Controller, Get, Body, Post, Patch, Param, Delete, ParseIntPipe, ParseUUIDPipe, Query, SetMetadata } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -6,9 +6,12 @@ import { GetCurrentUser } from 'src/common/decorators';
 import { User } from 'src/users/entities/user.entity';
 import { FilterOperator, FilterSuffix, Paginate, PaginateQuery, paginate, Paginated } from 'nestjs-paginate'
 import { Post as SocialPost } from './entities/post.entity';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Permissions } from 'src/common/decorators/permissions.decorator';
 
 @ApiTags('Posts')
+@ApiBearerAuth()
+@Permissions('ReadPost')
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
@@ -18,9 +21,10 @@ export class PostsController {
     return this.postsService.create(createPostDto, user);
   }
 
+  @Permissions('DeletePost')
   @Get()
-  findAll(@Paginate() query: PaginateQuery):Promise<Paginated<SocialPost>> {
-    return this.postsService.findAll(query);
+  findAll() {
+    return this.postsService.findAll();
   }
   @Get('search')
   search(@Query() s: string){
