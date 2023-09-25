@@ -13,6 +13,8 @@ import { PermissionsModule } from './permissions/permissions.module';
 import { SeedModule } from './database/seeds/seed.module';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { PermissionsGuard } from './common/guards/permissions.guard';
+import { CachingModule } from './caching/caching.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -32,13 +34,15 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
       }),
       inject: [ConfigService],
     }),
+    MulterModule.register({}),
     
     AuthModule,
     UsersModule,
     RolesModule,
     PostsModule,
     PermissionsModule,
-    SeedModule
+    SeedModule,
+    CachingModule
   ],
   controllers: [],
   providers: [

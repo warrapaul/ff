@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,14 +7,21 @@ import { ArrayContains, Between, IsNull, LessThan, LessThanOrEqual, Like, MoreTh
 import { User } from 'src/users/entities/user.entity';
 import { FilterOperator, FilterSuffix, Paginate, PaginateQuery, paginate, Paginated } from 'nestjs-paginate'
 import { title } from 'process';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PostsService {
+  private readonly logger = new Logger(PostsService.name)
   constructor(
     @InjectRepository(Post)
-    private postRepository:Repository<Post>
+    private postRepository:Repository<Post>,
+    private readonly config: ConfigService
   ){}
   async create(createPostDto: CreatePostDto, user:User) {
+
+    this.logger.error('**********logging error');
+    this.logger.verbose('**************logging verbose');
+    this.logger.log('************normal logger');
     const currPost = this.postRepository.create({...createPostDto, author:user});
     return await this.postRepository.save(currPost);
   }

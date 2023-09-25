@@ -7,9 +7,12 @@ import { Tokens } from './types';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { RolesService } from 'src/roles/roles.service';
 import { PermissionsService } from 'src/permissions/permissions.service';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
+  private logger = new Logger(AuthService.name);
+
     constructor(
         private userService:UsersService,
         private jwtService:JwtService,  

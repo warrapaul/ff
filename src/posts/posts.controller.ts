@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Post, Patch, Param, Delete, ParseIntPipe, ParseUUIDPipe, Query, SetMetadata } from '@nestjs/common';
+import { Controller, Get, Body, Post, Patch, Param, Delete, ParseIntPipe, ParseUUIDPipe, Query, SetMetadata, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -8,6 +8,10 @@ import { FilterOperator, FilterSuffix, Paginate, PaginateQuery, paginate, Pagina
 import { Post as SocialPost } from './entities/post.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { ImageUploadHelper } from 'src/common/helpers/image-upload.helper';
 
 @ApiTags('Posts')
 @ApiBearerAuth()
@@ -17,9 +21,39 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  create(@Body() createPostDto: CreatePostDto, @GetCurrentUser() user:User) {
-    return this.postsService.create(createPostDto, user);
+  @UseInterceptors(FileInterceptor('mainImage',ImageUploadHelper))
+  create(
+    @Body() createPostDto: CreatePostDto,
+    @UploadedFile() mainImage: Express.Multer.File,
+    @GetCurrentUser() user:User) {
+      
+    // return this.postsService.create(createPostDto, user);
+    return {
+      createPostDto,
+      mainImage
+    }
   }
+
+
+  // @Post()
+  // @UseInterceptors(FileInterceptor('mainImage'))
+  // create(
+  //   @Body() createPostDto: CreatePostDto,
+  //   @UploadedFile( new ParseFilePipe({
+  //     validators: [
+  //       new MaxFileSizeValidator({maxSize:1000}),
+  //       new FileTypeValidator({fileType:'image/jpeg' |'image/jpeg'})
+  //     ]
+  //   })) mainImage: Express.Multer.File,
+  //   @GetCurrentUser() user:User) {
+      
+  //   // return this.postsService.create(createPostDto, user);
+  //   return {
+  //     createPostDto,
+  //     mainImage
+  //   }
+  // }
+
 
   @Permissions('DeletePost')
   @Get()

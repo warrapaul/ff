@@ -19,6 +19,9 @@ export class Post extends ProjBaseEntity{
     @Column({type:'longtext'})
     description: string;
 
+    @Column({nullable: true})
+    mainImage:string;
+
     @ManyToOne(()=>User, (user)=>user.posts)
     @JoinColumn({name:'authorId'})
     author:User

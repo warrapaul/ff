@@ -10,8 +10,12 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true
   }))
-  const configService = app.get(ConfigService);
 
+  //app.setGlobalPrefix('proj');
+  // app.setGlobalPrefix('v1', { exclude: ['cats'] });
+
+
+  const configService = app.get(ConfigService);
   const config = new DocumentBuilder()
   .setTitle('Proj Documentation')
   .setDescription('The Proj API description')
@@ -19,10 +23,11 @@ async function bootstrap() {
   .addBearerAuth()
   .addTag('proj')
   .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('proj/api', app, document);
 
 
-const document = SwaggerModule.createDocument(app, config);
-SwaggerModule.setup('api', app, document);
+
 
   const port = configService.get('PORT');
   await app.listen(port);
