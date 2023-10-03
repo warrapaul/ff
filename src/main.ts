@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { VERSION_NEUTRAL, ValidationPipe, VersioningType } from '@nestjs/common';
 import { JwtGuard } from './common/guards';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerDocumentOptions, SwaggerModule } from '@nestjs/swagger';
@@ -11,7 +11,13 @@ async function bootstrap() {
     whitelist: true
   }))
 
-  //app.setGlobalPrefix('proj');
+  app.setGlobalPrefix('proj');
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion:'1',
+    // defaultVersion: VERSION_NEUTRAL
+
+  })
   // app.setGlobalPrefix('v1', { exclude: ['cats'] });
 
 

@@ -43,10 +43,9 @@ import { NewsModule } from './news/news.module';
     PostsModule,
     PermissionsModule,
     SeedModule,
-    CachingModule
+    CachingModule,
     NewsModule
   ],
-  controllers: [],
   providers: [
     {
       provide: APP_GUARD,
