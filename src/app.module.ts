@@ -11,6 +11,7 @@ import { AppConfig, DatabaseConfig } from './config';
 import { PostsModule } from './posts/posts.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { SeedModule } from './database/seeds/seed.module';
+import { NewsModule } from './news/news.module';
 
 @Module({
   imports: [
@@ -37,7 +38,8 @@ import { SeedModule } from './database/seeds/seed.module';
     RolesModule,
     PostsModule,
     PermissionsModule,
-    SeedModule
+    SeedModule,
+    NewsModule
   ],
   controllers: [],
   providers: [
