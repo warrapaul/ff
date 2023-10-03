@@ -15,6 +15,7 @@ import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { CachingModule } from './caching/caching.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { NewsModule } from './news/news.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { MulterModule } from '@nestjs/platform-express';
     PermissionsModule,
     SeedModule,
     CachingModule
+    NewsModule
   ],
   controllers: [],
   providers: [
