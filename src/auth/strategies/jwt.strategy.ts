@@ -21,7 +21,10 @@ export class JwtStrategy extends PassportStrategy(Strategy,'jwt') {
 
   async validate(payload: JwtPayload): Promise<User|undefined> {
     const user = await this.userService.findOne(payload.sub)
-    if(!user)  throw new HttpException('invalid access token',HttpStatus.UNAUTHORIZED)//throw new UnauthorizedException();
+    if(!user) {
+      throw new HttpException('invalid access token',HttpStatus.UNAUTHORIZED)//throw new UnauthorizedException();
+   }
+
 
     const permissions = await this.roleService.getPermissionNamesForUser(user.id);
     const userWithPermissions = {...user, permissions}    

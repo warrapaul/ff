@@ -4,6 +4,7 @@ import { VERSION_NEUTRAL, ValidationPipe, VersioningType } from '@nestjs/common'
 import { JwtGuard } from './common/guards';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerDocumentOptions, SwaggerModule } from '@nestjs/swagger';
+import { EventsGateway } from './messages/events/events.gateway';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,8 +15,8 @@ async function bootstrap() {
   app.setGlobalPrefix('proj');
   app.enableVersioning({
     type: VersioningType.URI,
-    defaultVersion:'1',
-    // defaultVersion: VERSION_NEUTRAL
+    // defaultVersion:'',
+    // defaultVersion:'1',
 
   })
   // app.setGlobalPrefix('v1', { exclude: ['cats'] });
@@ -37,6 +38,7 @@ async function bootstrap() {
 
   const port = configService.get('PORT');
   await app.listen(port);
+
 
 }
 bootstrap();

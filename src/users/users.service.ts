@@ -1,10 +1,11 @@
-import { ConflictException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {  ConflictException, HttpException, HttpStatus, Injectable, UseInterceptors } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt'
+import { UserSerializer } from './serializers/user.serializer';
 
 @Injectable()
 export class UsersService {
@@ -60,14 +61,25 @@ export class UsersService {
       'user.email',
       'user.phoneNumber',
       'user.status',
-      'user.password',
-      'user.hash',
+      // 'user.password',
+      // 'user.hash',
       'role.id',
       'role.name',
       'role.description',
       'role.isActive',
     ])
     .getOne();
+  }
+
+  async userProfile(id: string){
+    return await this.userRepository.findOne({
+      where:{id},
+      relations:{
+        role: true,        
+      }
+    })
+
+    
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {

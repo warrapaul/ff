@@ -2,10 +2,10 @@ import { Body, Controller, HttpCode, HttpStatus, Post, Req, UseGuards } from '@n
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import {  RtGuard } from 'src/common/guards';
 import { GetCurrentUser, GetCurrentUserId, IsPublic } from 'src/common/decorators';
 import { Tokens } from './types';
 import { ApiTags } from '@nestjs/swagger';
+import { RtGuard } from 'src/common/guards';
 
 @ApiTags('Authentication')
 @Controller('auth')

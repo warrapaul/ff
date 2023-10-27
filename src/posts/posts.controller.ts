@@ -15,7 +15,7 @@ import { ImageUploadHelper } from 'src/common/helpers/image-upload.helper';
 
 @ApiTags('Posts')
 @ApiBearerAuth()
-@Permissions('ReadPost')
+// @Permissions('ReadPost')
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}

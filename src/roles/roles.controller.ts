@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
@@ -39,12 +39,14 @@ export class RolesController {
 
 
   @Post('assign-permissions')
+  @HttpCode(HttpStatus.OK)
   async assignPermissionsToRole(@Body() assignPermissionsToRoleDto:AssignPermissionsToRoleDto){
     await this.rolesService.assignPermissionsToRole(assignPermissionsToRoleDto);
     return { message: 'Permissions assigned successfully' };
   }
 
   @Post('assign-user-role')
+  @HttpCode(HttpStatus.OK)
   async assignUserRole(@Body() assignUserRoleDto:AssignUserRoleDto){
     await this.rolesService.assignUserRole(assignUserRoleDto);
     return { message: 'Role assigned successfully' };

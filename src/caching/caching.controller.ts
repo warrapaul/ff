@@ -2,8 +2,10 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CachingService } from './caching.service';
 import { CreateCachingDto } from './dto/create-caching.dto';
 import { UpdateCachingDto } from './dto/update-caching.dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller('caching')
+@ApiTags('Caching')
 export class CachingController {
   constructor(private readonly cachingService: CachingService) {}
 

@@ -84,32 +84,36 @@ export class RolesService {
     await this.userRepository.save(user);
   }
 
+
+
   async getPermissionNamesForUser(userId: string):Promise<string[]>{
     const user = await this.userRepository.findOne({
       where:{id:userId},
       relations:['role', 'role.permissions']
     });
+    console.log({user})
 
     if(!user){
       throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
     }
 
     const role = user.role;
-    if(!role){
-      throw new HttpException('Role not found',HttpStatus.BAD_REQUEST);
-    }
-
-    if(!role.isActive){
-      throw new HttpException('Role is inactive',HttpStatus.BAD_REQUEST);
+    if(!role || !role.isActive){
+      return [];
     }
 
     const permissions = role.permissions;
     if(!permissions){
-      // throw new HttpException('permissions not found',HttpStatus.BAD_REQUEST);
       return []
     }
 
     const permissionNames = permissions.map((permission) => permission.name);
     return permissionNames;
   }
+
+
+
+
+
+
 }

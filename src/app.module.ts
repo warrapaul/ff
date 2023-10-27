@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -12,10 +12,12 @@ import { PostsModule } from './posts/posts.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { SeedModule } from './database/seeds/seed.module';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
-import { PermissionsGuard } from './common/guards/permissions.guard';
 import { CachingModule } from './caching/caching.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { NewsModule } from './news/news.module';
+import { MessagesModule } from './messages/messages.module';
+import { WsAuthMiddleware } from './common/middlewares/ws-auth.middleware';
+import { PermissionsGuard } from './common/guards/permissions.guard';
 
 @Module({
   imports: [
@@ -44,8 +46,9 @@ import { NewsModule } from './news/news.module';
     PermissionsModule,
     SeedModule,
     CachingModule,
-    NewsModule
-  ],
+    NewsModule,
+    MessagesModule
+    ],
   providers: [
     {
       provide: APP_GUARD,
@@ -57,6 +60,4 @@ import { NewsModule } from './news/news.module';
     }
   ],
 })
-export class AppModule {
-  
-}
+export class AppModule {}
