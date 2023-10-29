@@ -8,6 +8,7 @@ import { User } from 'src/users/entities/user.entity';
 import { FilterOperator, FilterSuffix, Paginate, PaginateQuery, paginate, Paginated } from 'nestjs-paginate'
 import { title } from 'process';
 import { ConfigService } from '@nestjs/config';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class PostsService {
@@ -15,7 +16,8 @@ export class PostsService {
   constructor(
     @InjectRepository(Post)
     private postRepository:Repository<Post>,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
+    private eventEmitter: EventEmitter2
   ){}
   async create(createPostDto: CreatePostDto, user:User) {
 
@@ -23,7 +25,11 @@ export class PostsService {
     this.logger.verbose('**************logging verbose');
     this.logger.log('************normal logger');
     const currPost = this.postRepository.create({...createPostDto, author:user});
-    return await this.postRepository.save(currPost);
+    const createdPost= await this.postRepository.save(currPost);
+
+    //emit event
+    this.eventEmitter.emit('post.created', createdPost)
+    return createdPost;
   }
   
   async search(keyword:string){
@@ -109,4 +115,7 @@ export class PostsService {
   remove(id: string) {
     return `This action removes a #${id} post`;
   }
+
+
+
 }

@@ -18,6 +18,7 @@ import { NewsModule } from './news/news.module';
 import { MessagesModule } from './messages/messages.module';
 import { WsAuthMiddleware } from './common/middlewares/ws-auth.middleware';
 import { PermissionsGuard } from './common/guards/permissions.guard';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
       }),
       inject: [ConfigService],
     }),
+    EventEmitterModule.forRoot(),
     MulterModule.register({}),
     
     AuthModule,

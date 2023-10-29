@@ -91,7 +91,6 @@ export class RolesService {
       where:{id:userId},
       relations:['role', 'role.permissions']
     });
-    console.log({user})
 
     if(!user){
       throw new HttpException('User not found',HttpStatus.BAD_REQUEST);

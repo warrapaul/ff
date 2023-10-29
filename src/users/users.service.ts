@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt'
 import { UserSerializer } from './serializers/user.serializer';
 
@@ -15,7 +15,6 @@ export class UsersService {
   ){}
   async create(createUserDto: CreateUserDto) {
     const existingUser = await this.findUserByEmail(createUserDto.email);
-
     if (existingUser) {
       throw new ConflictException(`User with email ${createUserDto.email} already exists.`);
     }
@@ -82,8 +81,47 @@ export class UsersService {
     
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.userRepository.findOneBy({id});
+    if(!user) {
+      throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
+    }
+
+    //ensure email is unique
+    if (updateUserDto.email) {      
+      //ensure email is unique
+      const existingUser = await this.userRepository.findOne({
+        where: {
+          email: updateUserDto.email,
+          id: Not(id),
+        },
+      });
+
+      if (existingUser) {
+        throw new ConflictException(`Email ${updateUserDto.email} is already in use.`);
+      }
+
+      user.email = updateUserDto.email;
+    }
+
+
+    //// Loop through the fields to update
+    // for (const field of ['name', 'otherField', 'anotherField']) {
+    //   if (updateUserDto[field]) {
+    //     user[field] = updateUserDto[field];
+    //   }
+    // }
+
+    if (updateUserDto.password) {
+        const salt = await bcrypt.genSalt();
+        const hash = await bcrypt.hash(updateUserDto.password, salt);
+        user.password = hash;
+    }
+
+    const updatedUser = await this.userRepository.save(user);
+    delete updatedUser.password;
+
+    return updatedUser;
   }
 
   remove(id: string) {

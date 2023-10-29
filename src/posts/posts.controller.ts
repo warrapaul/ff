@@ -27,11 +27,11 @@ export class PostsController {
     @UploadedFile() mainImage: Express.Multer.File,
     @GetCurrentUser() user:User) {
       
-    // return this.postsService.create(createPostDto, user);
-    return {
-      createPostDto,
-      mainImage
-    }
+    return this.postsService.create(createPostDto, user);
+    // return {
+    //   createPostDto,
+    //   mainImage
+    // }
   }
 
 
