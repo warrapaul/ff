@@ -7,6 +7,6 @@ export class PostCreatedListener{
     @OnEvent('post.created')
     handlePostCreatedEvent(event:Post){
         console.log('new post')
-        console.log(event)
+        console.log({event})
     }
 }

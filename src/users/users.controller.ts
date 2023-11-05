@@ -1,11 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, ParseUUIDPipe, UseInterceptors, ClassSerializerInterceptor } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, ParseUUIDPipe, UseInterceptors, ClassSerializerInterceptor, UploadedFile, ParseFilePipe } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { AdminUpdateUserDto, UpdateUserProfileDto } from './dto/update-user.dto';
 import { GetCurrentUser, GetCurrentUserId } from 'src/common/decorators';
 import { User } from './entities/user.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserSerializer } from './serializers/user.serializer';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadImgToFolderHelper, UploadImgToServerHelper } from 'src/common/helpers/image-upload.helper';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -40,9 +42,26 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
+ 
+
+
+  @Patch('update-profile/:id')
+  @UseInterceptors(FileInterceptor('profilePic',UploadImgToFolderHelper))
+  // @UseInterceptors(FileInterceptor('profilePic', UploadImgToServerHelper))
+  updateProfile(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateUserProfileDto: UpdateUserProfileDto,
+    @UploadedFile() profilePic: Express.Multer.File
+    ){
+      console.log(profilePic)
+      return this.usersService.updateUserProfile(id, updateUserProfileDto, profilePic)
+  }
+
+
+
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() adminUpdateUserDto: AdminUpdateUserDto) {
+    return this.usersService.update(id, adminUpdateUserDto);
   }
 
   @Delete(':id')

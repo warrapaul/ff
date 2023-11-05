@@ -19,6 +19,9 @@ import { MessagesModule } from './messages/messages.module';
 import { WsAuthMiddleware } from './common/middlewares/ws-auth.middleware';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { BullModule } from '@nestjs/bull';
+import { NOTIFY_SUBSCRIBED_CUSTOMERS } from './common/constants/posts.constants';
+import { UtilsModule } from './utils/utils.module';
 
 @Module({
   imports: [
@@ -39,6 +42,10 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       inject: [ConfigService],
     }),
     EventEmitterModule.forRoot(),
+
+    
+
+
     MulterModule.register({}),
     
     AuthModule,
@@ -49,7 +56,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     SeedModule,
     CachingModule,
     NewsModule,
-    MessagesModule
+    MessagesModule,
+    UtilsModule
     ],
   providers: [
     {

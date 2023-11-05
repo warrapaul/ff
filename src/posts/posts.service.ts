@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,6 +9,13 @@ import { FilterOperator, FilterSuffix, Paginate, PaginateQuery, paginate, Pagina
 import { title } from 'process';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
+import { HttpService } from '@nestjs/axios';
+import { ApiCallDto } from './dto/api-call.dto';
+import { catchError, firstValueFrom, lastValueFrom, map } from 'rxjs';
+import { response } from 'express';
+import { InjectQueue } from '@nestjs/bull';
+import { NOTIFY_SUBSCRIBED_CUSTOMERS } from 'src/common/constants/posts.constants';
+import { Queue } from 'bull';
 
 @Injectable()
 export class PostsService {
@@ -17,7 +24,10 @@ export class PostsService {
     @InjectRepository(Post)
     private postRepository:Repository<Post>,
     private readonly config: ConfigService,
-    private eventEmitter: EventEmitter2
+    private eventEmitter: EventEmitter2,
+    private readonly httpService:HttpService,
+    @InjectQueue(NOTIFY_SUBSCRIBED_CUSTOMERS)
+    private notifySubscribers: Queue
   ){}
   async create(createPostDto: CreatePostDto, user:User) {
 
@@ -29,6 +39,20 @@ export class PostsService {
 
     //emit event
     this.eventEmitter.emit('post.created', createdPost)
+
+
+    try {
+       //jobs and queues
+        await this.notifySubscribers.add('notify-posts-subscribers', createPostDto,{})
+        console.log('notification queued')
+    } catch (error) {
+      throw new HttpException('Failed to add new Post notification to the queue', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+
+   
+
+
     return createdPost;
   }
   
@@ -104,8 +128,8 @@ export class PostsService {
 
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} post`;
+  async findOne(id: string) {
+    return await this.postRepository.findOneBy({id})
   }
 
   update(id: string, updatePostDto: UpdatePostDto) {
@@ -115,6 +139,71 @@ export class PostsService {
   remove(id: string) {
     return `This action removes a #${id} post`;
   }
+
+
+
+  async getApiCalls(): Promise<ApiCallDto[]>{  
+   try{
+          const url = 'https://jsonplaceholder.typicode.com/comments';
+          const  data = await lastValueFrom(
+            this.httpService.get(url).pipe(
+              map(response =>{
+                console.log({response})
+                return response.data
+              }),
+              catchError(error => {
+                console.error('Error in API get calls', error);
+                throw new HttpException('Error in API get calls', HttpStatus.INTERNAL_SERVER_ERROR)
+              })
+            )
+          )
+          return data
+     }catch(error){
+      console.error('An error occurred:', error);
+      throw new HttpException('Error in API get calls', HttpStatus.INTERNAL_SERVER_ERROR)
+
+     }
+  }
+
+  async postApiCalls(){
+    try{
+          const requestConfig ={
+              headers:{
+                'Content-Type': 'application/json'
+              },
+              // params:{
+              //   param1:'something'
+              // }
+            }
+
+            const data = JSON.stringify({
+              title: 'foo',
+              body: 'bar',
+              userId: 1,
+            })
+
+            const url = 'https://jsonplaceholder.typicode.com/posts'
+            const responseData = await lastValueFrom(
+              this.httpService.post(url, data, requestConfig).pipe(
+                map(response => {
+                  return response.data
+                }),
+                catchError(error => {
+                  console.error('Error in Post API calls', error);
+                  throw new HttpException('Error in Post API calls', HttpStatus.INTERNAL_SERVER_ERROR)
+                })
+              )
+            )   
+            return responseData;       
+          
+    }catch(error){
+      console.error('An error occurred:', error);
+      throw new HttpException('Error in post API calls', HttpStatus.INTERNAL_SERVER_ERROR)
+
+    }
+  }
+
+
 
 
 

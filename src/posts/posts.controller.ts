@@ -11,7 +11,7 @@ import { Permissions } from 'src/common/decorators/permissions.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { ImageUploadHelper } from 'src/common/helpers/image-upload.helper';
+import { UploadImgToFolderHelper } from 'src/common/helpers/image-upload.helper';
 
 @ApiTags('Posts')
 @ApiBearerAuth()
@@ -21,7 +21,7 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('mainImage',ImageUploadHelper))
+  @UseInterceptors(FileInterceptor('mainImage',UploadImgToFolderHelper))
   create(
     @Body() createPostDto: CreatePostDto,
     @UploadedFile() mainImage: Express.Multer.File,
@@ -65,6 +65,7 @@ export class PostsController {
     return this.postsService.search(s);
   }
 
+
   @Get(':id') 
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.postsService.findOne(id);
@@ -79,4 +80,18 @@ export class PostsController {
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.postsService.remove(id);
   }
+
+
+  @Get('api-calls/list')
+  getApicalls(){
+    return this.postsService.getApiCalls();
+  }
+
+  @Post('api-calls/create')
+  postApicalls(){
+    return this.postsService.postApiCalls();
+  }
+ 
+
+  
 }

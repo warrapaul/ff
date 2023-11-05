@@ -1,0 +1,2 @@
+
+export const NOTIFY_SUBSCRIBED_CUSTOMERS='notify_subscribed_customers'

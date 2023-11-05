@@ -8,6 +8,9 @@ import { EventsGateway } from './messages/events/events.gateway';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors();
+
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true
   }))

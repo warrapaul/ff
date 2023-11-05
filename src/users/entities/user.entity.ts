@@ -23,7 +23,9 @@ export class User extends ProjBaseEntity {
     @Column()
     password: string;
 
-
+    @Column({nullable:true})
+    profilePic: string;
+    
     @Column({nullable:true})
     hash: string;
  

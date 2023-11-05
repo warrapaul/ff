@@ -63,7 +63,7 @@ export class AuthService {
         },
         {
           secret:process.env.JWT_TOKEN_KEY,
-          expiresIn:60*60*15,
+          expiresIn:60*60*24*7, //7days
         }),
         this.jwtService.signAsync({
           sub:userId,
@@ -71,7 +71,7 @@ export class AuthService {
         },
         {
           secret:process.env.JWT_REFRESH_TOKEN_KEY,
-          expiresIn:60*60*15,
+          expiresIn:60*60*24*14,
         })
       ])
 

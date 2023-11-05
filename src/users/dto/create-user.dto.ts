@@ -34,6 +34,11 @@ export class CreateUserDto {
    @ApiProperty()
    @IsOptional()
    @IsString()
+   profilePic: string;
+
+   @ApiProperty()
+   @IsOptional()
+   @IsString()
    role: Role;
 
 }

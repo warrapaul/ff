@@ -1,17 +1,24 @@
 import {  ConflictException, HttpException, HttpStatus, Injectable, UseInterceptors } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { AdminUpdateUserDto, UpdateUserProfileDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Not, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt'
 import { UserSerializer } from './serializers/user.serializer';
+import { HttpService } from '@nestjs/axios';
+import { MediaUtils } from 'src/utils/media.utils';
+
+
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>
+    private userRepository: Repository<User>,
+    private readonly httpService:HttpService,
+    private readonly mediaUtils: MediaUtils
+
   ){}
   async create(createUserDto: CreateUserDto) {
     const existingUser = await this.findUserByEmail(createUserDto.email);
@@ -81,40 +88,40 @@ export class UsersService {
     
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, adminUpdateUserDto: AdminUpdateUserDto) {
     const user = await this.userRepository.findOneBy({id});
     if(!user) {
       throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
     }
 
     //ensure email is unique
-    if (updateUserDto.email) {      
+    if (adminUpdateUserDto.email) {      
       //ensure email is unique
       const existingUser = await this.userRepository.findOne({
         where: {
-          email: updateUserDto.email,
+          email: adminUpdateUserDto.email,
           id: Not(id),
         },
       });
 
       if (existingUser) {
-        throw new ConflictException(`Email ${updateUserDto.email} is already in use.`);
+        throw new ConflictException(`Email ${adminUpdateUserDto.email} is already in use.`);
       }
 
-      user.email = updateUserDto.email;
+      user.email = adminUpdateUserDto.email;
     }
 
 
     //// Loop through the fields to update
     // for (const field of ['name', 'otherField', 'anotherField']) {
-    //   if (updateUserDto[field]) {
-    //     user[field] = updateUserDto[field];
+    //   if (adminUpdateUserDto[field]) {
+    //     user[field] = adminUpdateUserDto[field];
     //   }
     // }
 
-    if (updateUserDto.password) {
+    if (adminUpdateUserDto.password) {
         const salt = await bcrypt.genSalt();
-        const hash = await bcrypt.hash(updateUserDto.password, salt);
+        const hash = await bcrypt.hash(adminUpdateUserDto.password, salt);
         user.password = hash;
     }
 
@@ -142,9 +149,32 @@ export class UsersService {
 
   async logoutUser(id:string){
     const user = await this.userRepository.findOneBy({ id})
-    if(!user) throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
-    if(user.hash == null) throw new HttpException('Operation not allowed exceptin', HttpStatus.BAD_REQUEST); 
+    if(!user){
+        throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
+    }
+
+    if(user.hash == null){
+      throw new HttpException('Operation not allowed exceptin', HttpStatus.BAD_REQUEST); 
+    }
     user.hash = null;
     await this.userRepository.save(user)
   }
+
+  async updateUserProfile(id: string, updateUserProfileDto: UpdateUserProfileDto, profilePic: Express.Multer.File){
+    // const user = await this.userRepository.findOneBy({ id})
+    // if(!user){
+    //     throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
+    // }
+
+    
+    const uploadedImg= await this.mediaUtils.uploadToFileServer (profilePic.path)
+    // const uploadedImg= await this.mediaUtils.uploadToFileServerDirect(profilePic)
+
+    return uploadedImg;
+  } 
+
+
+
+
 }
+
