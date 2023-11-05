@@ -42,10 +42,18 @@ import { UtilsModule } from './utils/utils.module';
       inject: [ConfigService],
     }),
     EventEmitterModule.forRoot(),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        redis: {
+          host: configService.get('REDIS_HOST'),
+          port: configService.get('REDIS_PORT'),
+        },
+      }),
+      inject: [ConfigService],
+    }),
 
     
-
-
     MulterModule.register({}),
     
     AuthModule,

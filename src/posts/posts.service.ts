@@ -27,7 +27,7 @@ export class PostsService {
     private eventEmitter: EventEmitter2,
     private readonly httpService:HttpService,
     @InjectQueue(NOTIFY_SUBSCRIBED_CUSTOMERS)
-    private notifySubscribers: Queue
+    private notifySubscribers: Queue,
   ){}
   async create(createPostDto: CreatePostDto, user:User) {
 
@@ -41,12 +41,12 @@ export class PostsService {
     this.eventEmitter.emit('post.created', createdPost)
 
 
+     //notify subscribed users
     try {
-       //jobs and queues
-        await this.notifySubscribers.add('notify-posts-subscribers', createPostDto,{})
-        console.log('notification queued')
+      await this.notifySubscribers.add('persist-otp-queue', createPostDto, {});
+      this.logger.debug('New post notification queue successfully')
     } catch (error) {
-      throw new HttpException('Failed to add new Post notification to the queue', HttpStatus.INTERNAL_SERVER_ERROR)
+      throw new HttpException('Error adding new post notification to the queue', HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
 
