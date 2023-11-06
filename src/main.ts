@@ -5,11 +5,15 @@ import { JwtGuard } from './common/guards';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerDocumentOptions, SwaggerModule } from '@nestjs/swagger';
 import { EventsGateway } from './messages/events/events.gateway';
-
+import helmet from 'helmet';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors();
+  app.use(helmet())
+
+  app.enableCors({
+    origin:['http://localhost:3000','http://localhost:3002']
+  });
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true

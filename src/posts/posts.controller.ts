@@ -12,6 +12,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { UploadImgToFolderHelper } from 'src/common/helpers/image-upload.helper';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
 @ApiTags('Posts')
 @ApiBearerAuth()
@@ -60,11 +61,21 @@ export class PostsController {
   findAll() {
     return this.postsService.findAll();
   }
+
   @Get('search')
   search(@Query() s: string){
     return this.postsService.search(s);
   }
 
+  //custom rate limiting
+  @SkipThrottle()// skip rate limiting in entire controller or func
+  @Throttle({default: {ttl:6000, limit: 3}})//override limit set globally
+  @Get('custom-rate-limit')
+  customRateLimit(){
+    return {
+      message: 'success'
+    }
+  }
 
   @Get(':id') 
   findOne(@Param('id', ParseUUIDPipe) id: string) {

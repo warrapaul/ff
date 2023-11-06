@@ -22,6 +22,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { BullModule } from '@nestjs/bull';
 import { NOTIFY_SUBSCRIBED_CUSTOMERS } from './common/constants/posts.constants';
 import { UtilsModule } from './utils/utils.module';
+import { ThrottlerGuard, ThrottlerModule, seconds } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -34,6 +35,18 @@ import { UtilsModule } from './utils/utils.module';
         DatabaseConfig
         ],
     }),
+    ThrottlerModule.forRootAsync({
+      imports:[ConfigModule],
+      inject:[ConfigService],
+      useFactory:(configService: ConfigService)=>[
+        {
+          ttl: configService.get('THROTTLE_TTL'),
+          limit: configService.get('THROTTLE_LIMIT')
+        },
+       
+      ]
+    }),
+
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -75,6 +88,10 @@ import { UtilsModule } from './utils/utils.module';
     {
       provide:APP_GUARD,
       useClass:PermissionsGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard
     }
   ],
 })

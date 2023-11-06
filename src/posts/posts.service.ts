@@ -16,6 +16,8 @@ import { response } from 'express';
 import { InjectQueue } from '@nestjs/bull';
 import { NOTIFY_SUBSCRIBED_CUSTOMERS } from 'src/common/constants/posts.constants';
 import { Queue } from 'bull';
+import { createCipheriv, randomBytes, scrypt } from 'crypto';
+import { promisify } from 'util';
 
 @Injectable()
 export class PostsService {
@@ -75,6 +77,7 @@ export class PostsService {
     
   }
 
+
   async findAll(){
     return await this.postRepository.find({
       relations:{
@@ -127,6 +130,8 @@ export class PostsService {
     // return await this.postRepository.find()
 
   }
+
+
 
   async findOne(id: string) {
     return await this.postRepository.findOneBy({id})
