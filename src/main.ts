@@ -19,7 +19,7 @@ async function bootstrap() {
     whitelist: true
   }))
 
-  app.setGlobalPrefix('proj');
+  app.setGlobalPrefix('ff');
   app.enableVersioning({
     type: VersioningType.URI,
     // defaultVersion:'',
@@ -31,14 +31,14 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const config = new DocumentBuilder()
-  .setTitle('Proj Documentation')
-  .setDescription('The Proj API description')
+  .setTitle('FF Documentation')
+  .setDescription('The ff API description')
   .setVersion('1.0')
   .addBearerAuth()
-  .addTag('proj')
+  .addTag('ff')
   .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('proj/api', app, document);
+  SwaggerModule.setup('ff/api', app, document);
 
 
 

@@ -1,8 +1,8 @@
 module.exports = {
     apps:[
         {
-            name:'proj',
-            script:'/home/warra/Documents/projects/boilerplates/proj/dist/main.js',
+            name:'ff',
+            script:'/home/warra/Documents/projects/boilerplates/ff/dist/main.js',
             instances: 2,  // The number of instances in your cluster
             autorestart: true,
             exect_mode:'cluster',
