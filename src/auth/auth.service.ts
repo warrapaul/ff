@@ -47,7 +47,7 @@ export class AuthService {
       const user = await this.userService.findOne(id);
       if(!user) throw new ForbiddenException('Access Denied');
 
-      if(refreshToken !== user.hash) throw new ForbiddenException('Access Denied');
+      if(refreshToken !== user.hashRt) throw new ForbiddenException('Access Denied');
 
       const tokens = await this.generateToken(user.id, user.email);
       await this.userService.updateRefreshToken(user.id, tokens.refresh_token);

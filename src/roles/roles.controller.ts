@@ -6,7 +6,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AssignPermissionsToRoleDto } from './dto/assign-permissions-to-role.dto';
 import { AssignUserRoleDto } from './dto/assing-user-role.dto';
 
-@ApiTags('Roles and Permissions')
+@ApiTags('Roles')
 @ApiBearerAuth()
 @Controller('roles')
 export class RolesController {

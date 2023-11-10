@@ -8,33 +8,56 @@ import { ApiProperty } from "@nestjs/swagger";
 
 @Entity()
 export class User extends ProjBaseEntity {
+    // personal info
     @Column()
-    name: string;
+    firstName: string;
 
+    @Column({nullable: true})
+    middleName: string;
+
+    @Column()
+    lastName: string;
+
+    @Column()
+    dob: Date;
+
+    @Column()
+    nationalId: number;
+
+    @Column()
+    gender: string;  
+
+    // contact info
     @Column({unique: true})
     email: string;
 
     @Column()
     phoneNumber: string;
-    
+
+    @Column({nullable: true})
+    phoneNumberSecondary: string;
+
+
+    @Column({nullable:true})
+    idPicFront: string;
+
+    @Column({nullable:true})
+    idPicBack: string;
+ 
+    // account info 
     @Column({type:'enum', enum:UserAccStatusEnum, default:UserAccStatusEnum.ACTIVE})
     status: string;
 
     @Column()
     password: string;
-
-    @Column({nullable:true})
-    profilePic: string;
     
-    @Column({nullable:true})
-    hash: string;
- 
     @Column({nullable:true})
     hashRt: string;
 
     @ApiProperty({ type: "string" })
     @ManyToOne(()=>Role,(role)=>role.users)
     role:Role;
+  
 
     @OneToMany(()=>Post, (post)=>post.author)
     posts:Post[]

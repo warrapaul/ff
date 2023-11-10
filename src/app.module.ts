@@ -12,9 +12,7 @@ import { PostsModule } from './posts/posts.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { SeedModule } from './database/seeds/seed.module';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
-import { CachingModule } from './caching/caching.module';
 import { MulterModule } from '@nestjs/platform-express';
-import { NewsModule } from './news/news.module';
 import { MessagesModule } from './messages/messages.module';
 import { WsAuthMiddleware } from './common/middlewares/ws-auth.middleware';
 import { PermissionsGuard } from './common/guards/permissions.guard';
@@ -23,6 +21,7 @@ import { BullModule } from '@nestjs/bull';
 import { NOTIFY_SUBSCRIBED_CUSTOMERS } from './common/constants/posts.constants';
 import { UtilsModule } from './utils/utils.module';
 import { ThrottlerGuard, ThrottlerModule, seconds } from '@nestjs/throttler';
+import { ChamaaModule } from './chamaa/chamaa.module';
 
 @Module({
   imports: [
@@ -75,10 +74,9 @@ import { ThrottlerGuard, ThrottlerModule, seconds } from '@nestjs/throttler';
     PostsModule,
     PermissionsModule,
     SeedModule,
-    CachingModule,
-    NewsModule,
     MessagesModule,
-    UtilsModule
+    UtilsModule,
+    ChamaaModule
     ],
   providers: [
     {

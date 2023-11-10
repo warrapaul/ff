@@ -26,10 +26,8 @@ export class UserSerializer {
     password: string;
 
     @Exclude()
-    hash: string; 
+    hashRt: string; 
 
-    @Exclude()
-    hashRt: string;
 
     @Transform(({value})=>({
         id: value.id,

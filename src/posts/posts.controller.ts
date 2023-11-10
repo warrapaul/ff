@@ -6,7 +6,7 @@ import { GetCurrentUser } from 'src/common/decorators';
 import { User } from 'src/users/entities/user.entity';
 import { FilterOperator, FilterSuffix, Paginate, PaginateQuery, paginate, Paginated } from 'nestjs-paginate'
 import { Post as SocialPost } from './entities/post.entity';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiExcludeController, ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { Permissions } from 'src/common/decorators/permissions.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -14,6 +14,7 @@ import { extname } from 'path';
 import { UploadImgToFolderHelper } from 'src/common/helpers/image-upload.helper';
 import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
+@ApiExcludeController()
 @ApiTags('Posts')
 @ApiBearerAuth()
 // @Permissions('ReadPost')
@@ -106,3 +107,4 @@ export class PostsController {
 
   
 }
+

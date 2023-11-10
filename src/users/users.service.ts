@@ -140,10 +140,10 @@ export class UsersService {
     return await this.userRepository.findOneBy({email})    // return await this.userRepository.findOne({where:{email}})
   }
 
-  async updateRefreshToken(id:string, hash:string){
+  async updateRefreshToken(id:string, hashRt:string){
     const user = await this.userRepository.findOneBy({ id})
     if(!user) throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
-    user.hash = hash;
+    user.hashRt = hashRt;
     await this.userRepository.save(user)
   }
 
@@ -153,10 +153,10 @@ export class UsersService {
         throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
     }
 
-    if(user.hash == null){
+    if(user.hashRt == null){
       throw new HttpException('Operation not allowed exceptin', HttpStatus.BAD_REQUEST); 
     }
-    user.hash = null;
+    user.hashRt = null;
     await this.userRepository.save(user)
   }
 
