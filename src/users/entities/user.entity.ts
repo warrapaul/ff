@@ -5,6 +5,7 @@ import { Role } from "src/roles/entities/role.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { UserAccStatusEnum } from "../enums";
 import { ApiProperty } from "@nestjs/swagger";
+import { ChamaaOfficial } from "src/chamaa/entities/chamaa-officials.entity";
 
 @Entity()
 export class User extends ProjBaseEntity {
@@ -62,6 +63,9 @@ export class User extends ProjBaseEntity {
     @OneToMany(()=>Post, (post)=>post.author)
     posts:Post[]
 
+
+    @OneToMany(() => ChamaaOfficial, official => official.user)
+    officials: ChamaaOfficial[];
 }
 
 
