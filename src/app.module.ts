@@ -22,6 +22,7 @@ import { NOTIFY_SUBSCRIBED_CUSTOMERS } from './common/constants/posts.constants'
 import { UtilsModule } from './utils/utils.module';
 import { ThrottlerGuard, ThrottlerModule, seconds } from '@nestjs/throttler';
 import { ChamaaModule } from './chamaa/chamaa.module';
+import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
   imports: [
@@ -76,7 +77,8 @@ import { ChamaaModule } from './chamaa/chamaa.module';
     SeedModule,
     MessagesModule,
     UtilsModule,
-    ChamaaModule
+    ChamaaModule,
+    TransactionsModule
     ],
   providers: [
     {

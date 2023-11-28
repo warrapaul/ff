@@ -7,10 +7,13 @@ import { RoleModule } from 'src/database/seeds/role/role.module';
 import { RolesService } from 'src/roles/roles.service';
 import { HttpModule } from '@nestjs/axios';
 import { UtilsModule } from 'src/utils/utils.module';
+import { UserAccount } from './entities/user-account.entity';
+import { UserProfile } from './entities/user-profile.entity';
+import { UserAccountHistory } from './entities/user-account-history.entity';
 
 @Module({
   imports:[
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User,UserAccount,UserProfile,UserAccountHistory]),
     HttpModule,
     UtilsModule
   ],

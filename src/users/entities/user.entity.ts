@@ -2,14 +2,16 @@ import { Exclude } from "class-transformer";
 import { ProjBaseEntity } from "src/common/entity/base-entity";
 import { Post } from "src/posts/entities/post.entity";
 import { Role } from "src/roles/entities/role.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity,  JoinColumn,  ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { UserAccStatusEnum } from "../enums";
 import { ApiProperty } from "@nestjs/swagger";
 import { ChamaaOfficial } from "src/chamaa/entities/chamaa-officials.entity";
+import { Chamaa } from "src/chamaa/entities/chamaa.entity";
+import { UserProfile } from "./user-profile.entity";
+import { UserAccount } from "./user-account.entity";
 
 @Entity()
 export class User extends ProjBaseEntity {
-    // personal info
     @Column()
     firstName: string;
 
@@ -18,56 +20,35 @@ export class User extends ProjBaseEntity {
 
     @Column()
     lastName: string;
-
+   
     @Column()
-    dob: Date;
+    nationalId: number;    
 
-    @Column()
-    nationalId: number;
-
-    @Column()
-    gender: string;  
-
-    // contact info
     @Column({unique: true})
     email: string;
 
     @Column()
-    phoneNumber: string;
-
-    @Column({nullable: true})
-    phoneNumberSecondary: string;
-
-
-    @Column({nullable:true})
-    idPicFront: string;
-
-    @Column({nullable:true})
-    idPicBack: string;
+    phoneNumber: string;   
  
-    // account info 
     @Column({type:'enum', enum:UserAccStatusEnum, default:UserAccStatusEnum.ACTIVE})
     status: string;
 
     @Column()
     password: string;
     
-    @Column({nullable:true})
+    @Column()
     hashRt: string;
 
-    @ApiProperty({ type: "string" })
     @ManyToOne(()=>Role,(role)=>role.users)
     role:Role;
-  
 
-    @OneToMany(()=>Post, (post)=>post.author)
-    posts:Post[]
+    @OneToOne(()=>UserProfile, userProfile => userProfile.user)
+    userProfile: UserProfile
 
-
-    @OneToMany(() => ChamaaOfficial, official => official.user)
-    officials: ChamaaOfficial[];
+    @OneToOne(()=>UserAccount, userAccount => userAccount.user)
+    userAccount: UserAccount
+    
 }
-
 
 
 
