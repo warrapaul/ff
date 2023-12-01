@@ -30,8 +30,8 @@ export class UserSerializer {
 
 
     @Transform(({value})=>({
-        id: value.id,
-        name: value.name
+        id: value?.id,
+        name: value?.name
     }))
     role:Role;
 
