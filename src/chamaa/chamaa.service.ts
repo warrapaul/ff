@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateChamaaDto } from './dto/create-chamaa.dto';
 import { UpdateChamaaDto } from './dto/update-chamaa.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { UsersService } from 'src/users/users.service';
 import { ChamaaProfile } from './entities/chamaa-profile.entity';
 import { ChamaaOfficial } from './entities/chamaa-officials.entity';
+import { CreateMultipleOfficialPositionsDto, CreateOfficialPositionsDto, OfficialPositionDto } from './dto/official-positions.dto';
 
 @Injectable()
 export class ChamaaService {
@@ -79,8 +80,13 @@ export class ChamaaService {
       .getMany()
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} chamaa`;
+  async findOne(id: string) {
+    const chamaa = await this.chamaaRepository.findOneBy({id})
+    if(!chamaa){
+      throw new NotFoundException('Chamaa not found')
+    }
+
+    return chamaa
   }
 
   update(id: number, updateChamaaDto: UpdateChamaaDto) {
@@ -115,6 +121,31 @@ export class ChamaaService {
       "message": "Chamaa deleted successfully"
   };
 }
+
+async createOfficialPosition(createOfficialPositionsDto:CreateOfficialPositionsDto,id: string){
+  const chamaa = await this.findOne(createOfficialPositionsDto.chamaa)
+  const chamaaOfficialPosition = this.chamaaOfficialsRepository.create({
+    ...createOfficialPositionsDto,
+    chamaa
+  })
+
+  return this.chamaaOfficialsRepository.save(chamaaOfficialPosition)
+
+}
+async createOfficialPositions(createMultipleOfficialPositionsDto:CreateMultipleOfficialPositionsDto,id: string){
+  const chamaa = await this.findOne(createMultipleOfficialPositionsDto.chamaa)
+  const positionsData: OfficialPositionDto[] = createMultipleOfficialPositionsDto.positions
+
+  const positions = positionsData.map(position => {
+    console.log(position)
+    return this.chamaaOfficialsRepository.create({...position, chamaa});
+  });
+
+  return this.chamaaOfficialsRepository.save(positions);
+
+
+}
+
 
   async getChamaaByRegistrationNumber(registrationNumber: string){
     return await this.chamaaRepository.findOneBy({registrationNumber})

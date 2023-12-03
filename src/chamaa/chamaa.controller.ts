@@ -3,6 +3,7 @@ import { ChamaaService } from './chamaa.service';
 import { CreateChamaaDto } from './dto/create-chamaa.dto';
 import { UpdateChamaaDto } from './dto/update-chamaa.dto';
 import { Permissions } from 'src/common/decorators/permissions.decorator';
+import { CreateMultipleOfficialPositionsDto, CreateOfficialPositionsDto } from './dto/official-positions.dto';
 
 @Permissions('ViewChamaa')
 @Controller('chamaa')
@@ -22,7 +23,7 @@ export class ChamaaController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.chamaaService.findOne(+id);
+    return this.chamaaService.findOne(id);
   }
 
   @Permissions('UpdateChamaa')
@@ -37,5 +38,17 @@ export class ChamaaController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.chamaaService.remove(id);
+  }
+
+  @Permissions('UpdateChamaa')
+  @Post('officials/create-position')
+  createOfficialPosition(@Req() req, @Body() createOfficialPositionsDto: CreateOfficialPositionsDto) {
+    return this.chamaaService.createOfficialPosition(createOfficialPositionsDto, req.user.id);
+  }
+
+  @Permissions('UpdateChamaa')
+  @Post('officials/create-positions')
+  createOfficialPositions(@Req() req, @Body() createMultipleOfficialPositionsDto: CreateMultipleOfficialPositionsDto) {
+    return this.chamaaService.createOfficialPositions(createMultipleOfficialPositionsDto, req.user.id);
   }
 }

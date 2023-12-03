@@ -17,7 +17,7 @@ export class ChamaaOfficial extends ProjBaseEntity {
     @JoinColumn({ name: 'chamaaId' })
     chamaa: Chamaa;
 
-    @ManyToOne(() => UserAccount, userAccount => userAccount.officials)
+    @ManyToOne(() => UserAccount, userAccount => userAccount.officials, {nullable:true})
     @JoinColumn({ name: 'userAccountId' })
-    userAccount: UserAccount;
+    userAccount?: UserAccount;
 }
