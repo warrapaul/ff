@@ -6,6 +6,7 @@ import { Chamaa } from './entities/chamaa.entity';
 import { Repository } from 'typeorm';
 import { UsersService } from 'src/users/users.service';
 import { ChamaaProfile } from './entities/chamaa-profile.entity';
+import { ChamaaOfficial } from './entities/chamaa-officials.entity';
 
 @Injectable()
 export class ChamaaService {
@@ -14,6 +15,8 @@ export class ChamaaService {
     private readonly chamaaRepository: Repository<Chamaa>,
     @InjectRepository(ChamaaProfile)
     private readonly chamaaProfileRepository: Repository<ChamaaProfile>,
+    @InjectRepository(ChamaaOfficial)
+    private readonly chamaaOfficialsRepository: Repository<ChamaaOfficial>,
 
     private readonly userService: UsersService
   ){}
@@ -84,9 +87,34 @@ export class ChamaaService {
     return `This action updates a #${id} chamaa`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} chamaa`;
-  }
+  async remove(id: string) {
+    const chamaa = await this.chamaaRepository.findOne({
+      where :{id},
+      relations:{
+        chamaaProfile: true,
+        officials: true
+      }
+    })
+    if(!chamaa){
+      throw new HttpException('Chamaa not found', HttpStatus.BAD_REQUEST)
+    }
+
+    if (chamaa.chamaaProfile) {
+      await this.chamaaProfileRepository.remove(chamaa.chamaaProfile);
+    }
+
+    if (chamaa.officials && chamaa.officials.length > 0) {
+      for (const official of chamaa.officials) {
+        await this.chamaaOfficialsRepository.remove(official);
+      }
+    }
+
+    await this.chamaaRepository.remove(chamaa)
+    return {
+      "statusCode": HttpStatus.OK,
+      "message": "Chamaa deleted successfully"
+  };
+}
 
   async getChamaaByRegistrationNumber(registrationNumber: string){
     return await this.chamaaRepository.findOneBy({registrationNumber})

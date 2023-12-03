@@ -19,7 +19,7 @@ export class Chamaa extends ProjBaseEntity {
     registrationNumber?: string;
 
 
-    @OneToMany(() => ChamaaOfficial, official => official.chamaa,{nullable: true})
+    @OneToMany(() => ChamaaOfficial, official => official.chamaa,{nullable: true, cascade: true})
     officials?: ChamaaOfficial[];
 
 
@@ -27,7 +27,7 @@ export class Chamaa extends ProjBaseEntity {
     status: ChamaaStatusEnum;
 
    
-    @OneToOne(()=>ChamaaProfile, chamaaProfile => chamaaProfile.chamaa,{nullable: true})
+    @OneToOne(()=>ChamaaProfile, chamaaProfile => chamaaProfile.chamaa,{nullable: true, cascade: true})
     chamaaProfile?: ChamaaProfile
     //payment - monthly payments, registration fee, - features..
 }

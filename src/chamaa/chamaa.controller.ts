@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, HttpStatus, HttpCode } from '@nestjs/common';
 import { ChamaaService } from './chamaa.service';
 import { CreateChamaaDto } from './dto/create-chamaa.dto';
 import { UpdateChamaaDto } from './dto/update-chamaa.dto';
@@ -32,9 +32,10 @@ export class ChamaaController {
   }
 
 
+  @HttpCode(HttpStatus.OK)
   @Permissions('DeleteChamaa')
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.chamaaService.remove(+id);
+    return this.chamaaService.remove(id);
   }
 }
