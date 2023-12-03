@@ -1,13 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, ParseUUIDPipe, UseInterceptors, ClassSerializerInterceptor, UploadedFile, ParseFilePipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, ParseUUIDPipe, UseInterceptors, ClassSerializerInterceptor, UploadedFile, ParseFilePipe, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AdminUpdateUserDto, UpdateUserProfileDto } from './dto/update-user.dto';
-import { GetCurrentUser, GetCurrentUserId } from 'src/common/decorators';
+import { GetCurrentUser, GetCurrentUserId, IsPublic } from 'src/common/decorators';
 import { User } from './entities/user.entity';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserSerializer } from './serializers/user.serializer';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadImgToFolderHelper, UploadImgToServerHelper } from 'src/common/helpers/image-upload.helper';
+import { Permissions } from 'src/common/decorators';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -20,11 +21,27 @@ export class UsersController {
   //   return user;
   // }
 
+  @Get()
+  @Permissions('ViewUsers')
+  @Permissions('ViewAllUsers')
+  @IsPublic()
+  findAll() {
+    return this.usersService.findAll();
+  }
+
+
   @Get('profile')
-  @UseInterceptors(ClassSerializerInterceptor)
+  // @UseInterceptors(ClassSerializerInterceptor)
   async userProfile(@GetCurrentUserId() id: string){
-    const currUser= await this.usersService.userProfile(id);
-    return new UserSerializer(currUser)
+    // @Req() req,
+    // const currUser= await this.usersService.userProfile(id);
+    // return new UserSerializer(currUser)
+
+    // console.log('from req ',req.user.id)
+    console.log('from GetCurrentUserId ',id)
+    return await this.usersService.userProfile(id);
+
+    // return await this.usersService.userProfile(req.user.id);
   }
 
   @Post()
@@ -32,10 +49,6 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
-  }
 
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {

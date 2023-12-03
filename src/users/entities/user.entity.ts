@@ -1,6 +1,5 @@
 import { Exclude } from "class-transformer";
 import { ProjBaseEntity } from "src/common/entity/base-entity";
-import { Post } from "src/posts/entities/post.entity";
 import { Role } from "src/roles/entities/role.entity";
 import { Column, CreateDateColumn, Entity,  JoinColumn,  ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { UserAccStatusEnum } from "../enums";
@@ -36,8 +35,8 @@ export class User extends ProjBaseEntity {
     @Column()
     password: string;
     
-    @Column()
-    hashRt: string;
+    @Column({nullable: true})
+    hashRt?: string;
 
     @ManyToOne(()=>Role,(role)=>role.users)
     role:Role;

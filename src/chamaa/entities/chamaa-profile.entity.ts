@@ -15,12 +15,12 @@ export class ChamaaProfile extends ProjBaseEntity {
     createdBy: UserAccount;
 
     @Column({nullable: true})
-    locationCounty: string;
+    locationCounty?: string;
 
     @Column({nullable: true})
-    locationSubCounty: string;
+    locationSubCounty?: string;
 
     @Column({nullable: true})
-    locationWard: string;
+    locationWard?: string;
 
 }

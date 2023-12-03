@@ -3,8 +3,6 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { RoleModule } from 'src/database/seeds/role/role.module';
-import { RolesService } from 'src/roles/roles.service';
 import { HttpModule } from '@nestjs/axios';
 import { UtilsModule } from 'src/utils/utils.module';
 import { UserAccount } from './entities/user-account.entity';
@@ -15,7 +13,7 @@ import { UserAccountHistory } from './entities/user-account-history.entity';
   imports:[
     TypeOrmModule.forFeature([User,UserAccount,UserProfile,UserAccountHistory]),
     HttpModule,
-    UtilsModule
+    UtilsModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

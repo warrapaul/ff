@@ -8,9 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './common/guards';
 import { AppConfig, DatabaseConfig } from './config';
-import { PostsModule } from './posts/posts.module';
 import { PermissionsModule } from './permissions/permissions.module';
-import { SeedModule } from './database/seeds/seed.module';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { MulterModule } from '@nestjs/platform-express';
 import { MessagesModule } from './messages/messages.module';
@@ -72,9 +70,7 @@ import { TransactionsModule } from './transactions/transactions.module';
     AuthModule,
     UsersModule,
     RolesModule,
-    PostsModule,
     PermissionsModule,
-    SeedModule,
     MessagesModule,
     UtilsModule,
     ChamaaModule,

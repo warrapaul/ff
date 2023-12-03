@@ -12,23 +12,23 @@ export class Chamaa extends ProjBaseEntity {
     @Column()
     name: string;
 
-    @Column({ type: 'text' }) // 'text' type can hold longer descriptions
-    description: string;
+    @Column({ type: 'text' , nullable: true}) // 'text' type can hold longer descriptions
+    description?: string;
 
     @Column({nullable: true})
-    registrationNumber: string;
+    registrationNumber?: string;
 
 
-    @OneToMany(() => ChamaaOfficial, official => official.chamaa)
-    officials: ChamaaOfficial[];
+    @OneToMany(() => ChamaaOfficial, official => official.chamaa,{nullable: true})
+    officials?: ChamaaOfficial[];
 
 
     @Column({type: 'enum', enum: ChamaaStatusEnum, default: ChamaaStatusEnum.PENDING_APPROVAL})
     status: ChamaaStatusEnum;
 
    
-    @OneToOne(()=>ChamaaProfile, chamaaProfile => chamaaProfile.chamaa)
-    chamaaProfile: ChamaaProfile
+    @OneToOne(()=>ChamaaProfile, chamaaProfile => chamaaProfile.chamaa,{nullable: true})
+    chamaaProfile?: ChamaaProfile
     //payment - monthly payments, registration fee, - features..
 }
 

@@ -8,6 +8,8 @@ import * as bcrypt from 'bcrypt'
 import { UserSerializer } from './serializers/user.serializer';
 import { HttpService } from '@nestjs/axios';
 import { MediaUtils } from 'src/utils/media.utils';
+import { UserAccount } from './entities/user-account.entity';
+import { UserProfile } from './entities/user-profile.entity';
 
 
 
@@ -16,6 +18,11 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(UserAccount)
+    private readonly userAccountRepository: Repository<UserAccount>,
+    @InjectRepository(UserProfile)
+    private readonly userProfiletRepository: Repository<UserProfile>,
+
     private readonly httpService:HttpService,
     private readonly mediaUtils: MediaUtils
 
@@ -33,21 +40,83 @@ export class UsersService {
 
     const currUser = this.userRepository.create({...userDto,password: hash});
     const savedUser= await this.userRepository.save(currUser);
+
+
+    const accountNumber = '7867465352412456'
+
+    const userAccount = this.userAccountRepository.create({
+      user: currUser,
+      accountNumber: accountNumber
+    })
+    await this.userAccountRepository.save(userAccount)
+
+    const userProfile = this.userProfiletRepository.create({
+      user: currUser
+    })
+    await this.userProfiletRepository.save(userProfile)
+
     delete savedUser.password
     return savedUser
   }
 
 
   async findAll() {
+    // return await this.userRepository
+    // .createQueryBuilder('user')
+    // .leftJoinAndSelect('user.role','role')
+    // .leftJoinAndSelect('role.permissions','permission')
+    // .select(['user.id','user.name','user.email',
+    //         'role.id','role.name',
+    //         'permission.id','permission.name'])
+    // .getMany();
+
     return await this.userRepository
     .createQueryBuilder('user')
-    .leftJoinAndSelect('user.role','role')
+    .leftJoinAndSelect('user.role', 'role')
     .leftJoinAndSelect('role.permissions','permission')
-    .select(['user.id','user.name','user.email',
-            'role.id','role.name',
-            'permission.id','permission.name'])
-    .getMany();
+    .leftJoinAndSelect('user.userProfile', 'userProfile')
+    .leftJoinAndSelect('user.userAccount', 'userAccount')
+    .leftJoinAndSelect('userAccount.officials', 'officials')
+    .leftJoinAndSelect('userAccount.createdChamaas', 'createdChamaas')
 
+    .select([
+      'user.id',
+      'user.firstName',
+      'user.middleName',
+      'user.lastName',
+      'user.nationalId',
+      'user.email',
+      'user.phoneNumber',
+      'user.status',
+
+      'userProfile.gender',
+      'userProfile.dob',
+      'userProfile.phoneNumberSecondary',
+      'userProfile.idPicFront',
+      'userProfile.idPicBack',
+
+      'userAccount.accountNumber',
+
+      'officials.position',
+      'officials.roleDescription',
+      'officials.chamaa',
+
+      'createdChamaas.chamaa',
+      'createdChamaas.locationCounty',
+      'createdChamaas.locationSubCounty',
+
+
+      // 'user.password',
+      // 'user.hash',
+      'role.id',
+      'role.name',
+      'role.description',
+      'role.isActive',
+
+      'permission.id',
+      'permission.name'
+    ])
+    .getMany();
   }
 
   async findOne(id: string) {
@@ -61,31 +130,117 @@ export class UsersService {
     .createQueryBuilder('user')
     .where('user.id = :id', { id })
     .leftJoinAndSelect('user.role', 'role')
+    .leftJoinAndSelect('role.permissions','permission')
+    .leftJoinAndSelect('user.userProfile', 'userProfile')
+    .leftJoinAndSelect('user.userAccount', 'userAccount')
+    .leftJoinAndSelect('userAccount.officials', 'officials')
+    .leftJoinAndSelect('userAccount.createdChamaas', 'createdChamaas')
+
     .select([
       'user.id',
-      'user.name',
+      'user.firstName',
+      'user.middleName',
+      'user.lastName',
+      'user.nationalId',
       'user.email',
       'user.phoneNumber',
       'user.status',
+
+      'userProfile.gender',
+      'userProfile.dob',
+      'userProfile.phoneNumberSecondary',
+      'userProfile.idPicFront',
+      'userProfile.idPicBack',
+
+      'userAccount.accountNumber',
+
+      'officials.position',
+      'officials.roleDescription',
+      'officials.chamaa',
+
+      'createdChamaas.chamaa',
+      'createdChamaas.locationCounty',
+      'createdChamaas.locationSubCounty',
+
+
       // 'user.password',
       // 'user.hash',
       'role.id',
       'role.name',
       'role.description',
       'role.isActive',
+
+      'permission.id',
+      'permission.name'
     ])
     .getOne();
   }
 
   async userProfile(id: string){
-    return await this.userRepository.findOne({
-      where:{id},
-      relations:{
-        role: true,        
-      }
-    })
+    return await this.userRepository
+    .createQueryBuilder('user')
+    .where('user.id = :id', { id })
+    .leftJoinAndSelect('user.role', 'role')
+    .leftJoinAndSelect('role.permissions','permission')
+    .leftJoinAndSelect('user.userProfile', 'userProfile')
+    .leftJoinAndSelect('user.userAccount', 'userAccount')
+    .leftJoinAndSelect('userAccount.officials', 'officials')
+    .leftJoinAndSelect('userAccount.createdChamaas', 'createdChamaas')
+
+    .select([
+      'user.id',
+      'user.firstName',
+      'user.middleName',
+      'user.lastName',
+      'user.nationalId',
+      'user.email',
+      'user.phoneNumber',
+      'user.status',
+
+      'userProfile.gender',
+      'userProfile.dob',
+      'userProfile.phoneNumberSecondary',
+      'userProfile.idPicFront',
+      'userProfile.idPicBack',
+
+      'userAccount.accountNumber',
+
+      'officials.position',
+      'officials.roleDescription',
+      'officials.chamaa',
+
+      'createdChamaas.chamaa',
+      'createdChamaas.locationCounty',
+      'createdChamaas.locationSubCounty',
+
+
+      // 'user.password',
+      // 'user.hash',
+      'role.id',
+      'role.name',
+      'role.description',
+      'role.isActive',
+
+      'permission.id',
+      'permission.name'
+    ])
+    .getOne();
+    
+    // return await this.userRepository.findOne({
+    //   where:{id},
+    //   relations:{
+    //     role: true,        
+    //   }
+    // })
+    
 
     
+  }
+
+  async getUserAccountInfoByUserId(userId: string) {
+    return await this.userAccountRepository.findOne({
+      where: { user: {id: userId} },
+    });
   }
 
   async update(id: string, adminUpdateUserDto: AdminUpdateUserDto) {
@@ -142,7 +297,9 @@ export class UsersService {
 
   async updateRefreshToken(id:string, hashRt:string){
     const user = await this.userRepository.findOneBy({ id})
-    if(!user) throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
+    if(!user){ 
+      throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
+    }
     user.hashRt = hashRt;
     await this.userRepository.save(user)
   }

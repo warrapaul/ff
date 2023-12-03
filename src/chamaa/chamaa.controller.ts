@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { ChamaaService } from './chamaa.service';
 import { CreateChamaaDto } from './dto/create-chamaa.dto';
 import { UpdateChamaaDto } from './dto/update-chamaa.dto';
@@ -11,8 +11,8 @@ export class ChamaaController {
 
   @Permissions('CreateChamaa')
   @Post()
-  create(@Body() createChamaaDto: CreateChamaaDto) {
-    return this.chamaaService.create(createChamaaDto);
+  create(@Req() req, @Body() createChamaaDto: CreateChamaaDto) {
+    return this.chamaaService.create(createChamaaDto, req.user.id);
   }
 
   @Get()

@@ -8,19 +8,19 @@ export class UserProfile extends ProjBaseEntity{
     @JoinColumn({name:'userId'})
     user: User;
 
-    @Column()
-    gender: string; 
+    @Column({nullable: true})
+    gender?: string; 
     
-    @Column()
-    dob: Date;
+    @Column({nullable: true})
+    dob?: Date;
 
     @Column({nullable: true})
     phoneNumberSecondary: string;
 
 
     @Column({nullable:true})
-    idPicFront: string;
+    idPicFront?: string;
 
     @Column({nullable:true})
-    idPicBack: string;
+    idPicBack?: string;
 }

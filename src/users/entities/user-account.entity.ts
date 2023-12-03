@@ -13,13 +13,13 @@ export class UserAccount extends ProjBaseEntity{
     user: User;
 
     @Column({unique:true})
-    accountNumber: number;
+    accountNumber: string;
 
-    @OneToMany(() => ChamaaOfficial, official => official.userAccount)
-    officials: ChamaaOfficial[];
+    @OneToMany(() => ChamaaOfficial, official => official.userAccount,{nullable: true})
+    officials?: ChamaaOfficial[];
 
 
-    @OneToMany(()=>ChamaaProfile, chamaaProfile=> chamaaProfile.createdBy)
-    createdChamaas: ChamaaProfile[];
+    @OneToMany(()=>ChamaaProfile, chamaaProfile=> chamaaProfile.createdBy, {nullable: true})
+    createdChamaas?: ChamaaProfile[];
 
 }
