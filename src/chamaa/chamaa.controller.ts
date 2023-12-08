@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Req, HttpStatus, HttpCode } from '@nestjs/common';
 import { ChamaaService } from './chamaa.service';
 import { CreateChamaaDto } from './dto/create-chamaa.dto';
-import { UpdateChamaaDto } from './dto/update-chamaa.dto';
+import { UpdateChamaaDto, UpdateChamaaProfile } from './dto/update-chamaa.dto';
 import { Permissions } from 'src/common/decorators/permissions.decorator';
 import { CreateMultipleOfficialPositionsDto, CreateOfficialPositionsDto } from './dto/official-positions.dto';
 
@@ -23,13 +23,20 @@ export class ChamaaController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.chamaaService.findOne(id);
+    return this.chamaaService.findChamaaById(id);
+  }
+
+
+  @Permissions('UpdateChamaa')
+  @Patch('update-profile')
+  updateChamaaProfile(@Body() updateChamaaProfile: UpdateChamaaProfile) {
+    return this.chamaaService.updateChamaaProfile(updateChamaaProfile);
   }
 
   @Permissions('UpdateChamaa')
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateChamaaDto: UpdateChamaaDto) {
-    return this.chamaaService.update(+id, updateChamaaDto);
+  updateChamaa(@Param('id') id: string, @Body() updateChamaaDto: UpdateChamaaDto) {
+    return this.chamaaService.updateChamaa(id, updateChamaaDto);
   }
 
 

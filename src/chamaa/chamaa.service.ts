@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateChamaaDto } from './dto/create-chamaa.dto';
-import { UpdateChamaaDto } from './dto/update-chamaa.dto';
+import { UpdateChamaaDto, UpdateChamaaProfile } from './dto/update-chamaa.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Chamaa } from './entities/chamaa.entity';
 import { Repository } from 'typeorm';
@@ -80,7 +80,7 @@ export class ChamaaService {
       .getMany()
   }
 
-  async findOne(id: string) {
+  async findChamaaById(id: string) {
     const chamaa = await this.chamaaRepository.findOneBy({id})
     if(!chamaa){
       throw new NotFoundException('Chamaa not found')
@@ -89,8 +89,47 @@ export class ChamaaService {
     return chamaa
   }
 
-  update(id: number, updateChamaaDto: UpdateChamaaDto) {
-    return `This action updates a #${id} chamaa`;
+  async findChamaaProfileByChamaaId(id: string) {
+    // const chamaa = await this.chamaaRepository.findOneBy({id})
+    // const chamaaProfile = await this.chamaaProfileRepository.findOneBy({chamaa})
+    const chamaaProfile = await this.chamaaProfileRepository.findOne({
+      where: { chamaa: { id} },
+    });
+
+
+    if(!chamaaProfile){
+      throw new NotFoundException('Chamaa Profile not found')
+    }
+
+    return chamaaProfile
+  }
+
+  async updateChamaa(id: string, updateChamaaDto: UpdateChamaaDto) {
+    const chamaa = await this.findChamaaById(id)
+    return await this.chamaaRepository.save({...chamaa, ...updateChamaaDto})
+    
+    //alt
+
+    // if(updateChamaaDto.name !==undefined){
+    //   chamaa.name= updateChamaaDto.name
+    // }
+    // if(updateChamaaDto.description !==undefined){
+    //   chamaa.description= updateChamaaDto.description
+    // }
+    // if(updateChamaaDto.registrationNumber !==undefined){
+    //   chamaa.registrationNumber= updateChamaaDto.registrationNumber
+    // }
+
+    // return await this.chamaaRepository.save(chamaa)
+
+  }
+
+  async updateChamaaProfile( updateChamaaProfile: UpdateChamaaProfile){
+    const chamaaProfile = await this.findChamaaProfileByChamaaId(updateChamaaProfile.chamaa)
+   
+    Object.assign(chamaaProfile, updateChamaaProfile);
+
+    return await this.chamaaProfileRepository.save(chamaaProfile)
   }
 
   async remove(id: string) {
@@ -123,7 +162,7 @@ export class ChamaaService {
 }
 
 async createOfficialPosition(createOfficialPositionsDto:CreateOfficialPositionsDto,id: string){
-  const chamaa = await this.findOne(createOfficialPositionsDto.chamaa)
+  const chamaa = await this.findChamaaById(createOfficialPositionsDto.chamaa)
   const chamaaOfficialPosition = this.chamaaOfficialsRepository.create({
     ...createOfficialPositionsDto,
     chamaa
@@ -133,7 +172,7 @@ async createOfficialPosition(createOfficialPositionsDto:CreateOfficialPositionsD
 
 }
 async createOfficialPositions(createMultipleOfficialPositionsDto:CreateMultipleOfficialPositionsDto,id: string){
-  const chamaa = await this.findOne(createMultipleOfficialPositionsDto.chamaa)
+  const chamaa = await this.findChamaaById(createMultipleOfficialPositionsDto.chamaa)
   const positionsData: OfficialPositionDto[] = createMultipleOfficialPositionsDto.positions
 
   const positions = positionsData.map(position => {
@@ -146,8 +185,8 @@ async createOfficialPositions(createMultipleOfficialPositionsDto:CreateMultipleO
 
 }
 
-
   async getChamaaByRegistrationNumber(registrationNumber: string){
     return await this.chamaaRepository.findOneBy({registrationNumber})
   }
+
 }

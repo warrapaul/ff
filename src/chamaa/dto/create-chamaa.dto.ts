@@ -13,16 +13,4 @@ export class CreateChamaaDto {
     @IsString()
     registrationNumber: string;    
 
-    @IsOptional()
-    @IsString()
-    locationCounty: string;
-
-    @IsOptional()
-    @IsString()
-    locationSubCounty: string;
-
-    @IsOptional()
-    @IsString()
-    locationWard: string;
-
 }
