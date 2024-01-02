@@ -3,7 +3,7 @@ import { ChamaaService } from './chamaa.service';
 import { CreateChamaaDto } from './dto/create-chamaa.dto';
 import { UpdateChamaaDto, UpdateChamaaProfile } from './dto/update-chamaa.dto';
 import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { CreateMultipleOfficialPositionsDto, CreateOfficialPositionsDto } from './dto/official-positions.dto';
+import { CreateMultipleOfficialPositionsDto, CreateOfficialPositionsDto, UpdateOfficialPositionDto } from './dto/official-positions.dto';
 
 @Permissions('ViewChamaa')
 @Controller('chamaa')
@@ -58,4 +58,13 @@ export class ChamaaController {
   createOfficialPositions(@Req() req, @Body() createMultipleOfficialPositionsDto: CreateMultipleOfficialPositionsDto) {
     return this.chamaaService.createOfficialPositions(createMultipleOfficialPositionsDto, req.user.id);
   }
+
+  @Permissions('UpdateChamaa')
+  @Patch('officials/update-position/:positionId')
+  updateOfficialPosition(@Param('positionId') positionId: string,@Req() req, @Body() updateOfficialPositionDto: UpdateOfficialPositionDto){
+    console.log({'req user id': req.user.id})
+    return this.chamaaService.updateOfficialPosition(positionId, updateOfficialPositionDto, req.user.id)
+  }
+
+
 }

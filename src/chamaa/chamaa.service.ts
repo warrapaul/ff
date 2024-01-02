@@ -7,7 +7,7 @@ import { Repository } from 'typeorm';
 import { UsersService } from 'src/users/users.service';
 import { ChamaaProfile } from './entities/chamaa-profile.entity';
 import { ChamaaOfficial } from './entities/chamaa-officials.entity';
-import { CreateMultipleOfficialPositionsDto, CreateOfficialPositionsDto, OfficialPositionDto } from './dto/official-positions.dto';
+import { CreateMultipleOfficialPositionsDto, CreateOfficialPositionsDto, OfficialPositionDto, UpdateOfficialPositionDto } from './dto/official-positions.dto';
 
 @Injectable()
 export class ChamaaService {
@@ -54,6 +54,8 @@ export class ChamaaService {
       .leftJoinAndSelect('chamaa.chamaaProfile','chamaaProfile')
       .leftJoinAndSelect('chamaaProfile.createdBy', 'createdBy')
       .leftJoinAndSelect('createdBy.user', 'createdBUuser')
+      .leftJoinAndSelect('officials.userAccount', 'userAccount')
+      .leftJoinAndSelect('userAccount.user', 'officialUser')
       .select([
         'chamaa.id',
         'chamaa.name',
@@ -64,6 +66,13 @@ export class ChamaaService {
         'officials.id',
         'officials.position',
         'officials.roleDescription',
+        'userAccount.id',
+        'officialUser.id',
+        'officialUser.firstName',
+        'officialUser.middleName',
+        'officialUser.lastName',
+        'officialUser.phoneNumber',
+
 
         'chamaaProfile.id',
         'chamaaProfile.createdBy',
@@ -81,7 +90,51 @@ export class ChamaaService {
   }
 
   async findChamaaById(id: string) {
-    const chamaa = await this.chamaaRepository.findOneBy({id})
+    // const chamaa = await this.chamaaRepository.findOneBy({id})
+    const chamaa = await this.chamaaRepository
+      .createQueryBuilder('chamaa')
+      .leftJoinAndSelect('chamaa.officials','officials')
+      .leftJoinAndSelect('chamaa.chamaaProfile','chamaaProfile')
+      .leftJoinAndSelect('chamaaProfile.createdBy', 'createdBy')
+      .leftJoinAndSelect('createdBy.user', 'createdBUuser')
+      .leftJoinAndSelect('officials.userAccount', 'userAccount')
+      .leftJoinAndSelect('userAccount.user', 'officialUser')
+
+
+      .select([
+        'chamaa.id',
+        'chamaa.name',
+        'chamaa.description',
+        'chamaa.registrationNumber',
+        'chamaa.status',
+
+        'officials.id',
+        'officials.position',
+        'officials.roleDescription',
+        'userAccount.id',
+        'officialUser.id',
+        'officialUser.firstName',
+        'officialUser.middleName',
+        'officialUser.lastName',
+        'officialUser.phoneNumber',
+
+
+
+        'chamaaProfile.id',
+        'chamaaProfile.createdBy',
+        'chamaaProfile.locationCounty',
+        'chamaaProfile.locationSubCounty',
+        'chamaaProfile.locationWard',
+
+        'createdBy.id',
+        'createdBUuser.id', 
+        'createdBUuser.firstName', 
+        'createdBUuser.lastName',
+
+      ])
+      .where('chamaa.id = :id',{id})
+      .getOne()
+
     if(!chamaa){
       throw new NotFoundException('Chamaa not found')
     }
@@ -185,6 +238,26 @@ async createOfficialPositions(createMultipleOfficialPositionsDto:CreateMultipleO
 
 }
 
+async updateOfficialPosition(positionId: string, updateOfficialPositionDto: UpdateOfficialPositionDto,id: string){
+  const position = await this.getOfficialPositionById(positionId)
+ 
+  if(updateOfficialPositionDto.userAccount){
+    const user = await this.userService.getUserAccountInfoByUserId(updateOfficialPositionDto.userAccount)
+    updateOfficialPositionDto.userAccount= user.id
+  }
+ 
+  Object.assign(position, updateOfficialPositionDto)
+  
+  return await this.chamaaOfficialsRepository.save(position)
+}
+
+  async getOfficialPositionById(id: string){
+    const position =  await this.chamaaOfficialsRepository.findOneBy({id})
+    if(!position){
+      throw new NotFoundException('Position Not found')
+    }
+    return position;
+  }
   async getChamaaByRegistrationNumber(registrationNumber: string){
     return await this.chamaaRepository.findOneBy({registrationNumber})
   }

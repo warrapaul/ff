@@ -1,6 +1,5 @@
-import {  ConflictException, HttpException, HttpStatus, Injectable, UseInterceptors } from '@nestjs/common';
+import {  ConflictException, HttpException, HttpStatus, Injectable, NotFoundException, UseInterceptors } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { AdminUpdateUserDto, UpdateUserProfileDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Not, Repository } from 'typeorm';
@@ -10,6 +9,8 @@ import { HttpService } from '@nestjs/axios';
 import { MediaUtils } from 'src/utils/media.utils';
 import { UserAccount } from './entities/user-account.entity';
 import { UserProfile } from './entities/user-profile.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 
 
 
@@ -42,7 +43,7 @@ export class UsersService {
     const savedUser= await this.userRepository.save(currUser);
 
 
-    const accountNumber = '7867465352412456'
+    const accountNumber = await this.generateAccountNumber();
 
     const userAccount = this.userAccountRepository.create({
       user: currUser,
@@ -59,7 +60,21 @@ export class UsersService {
     return savedUser
   }
 
-
+  async generateAccountNumber(){
+    const randomNumber = Math.floor(100000000000 + Math.random() * 900000000000);
+    const accountNumber = String(randomNumber).padStart(12, '0'); //12 digits
+    const accExists = await this.userAccountRepository
+      .createQueryBuilder('user_account')
+      .select(['accountNumber'])
+      .andWhere('accountNumber = :accountNumber',{accountNumber})
+      .getExists();
+      
+    if(accExists){
+     return this.generateAccountNumber()
+    }else{
+      return accountNumber
+    }
+  }
   async findAll() {
     // return await this.userRepository
     // .createQueryBuilder('user')
@@ -77,6 +92,7 @@ export class UsersService {
     .leftJoinAndSelect('user.userProfile', 'userProfile')
     .leftJoinAndSelect('user.userAccount', 'userAccount')
     .leftJoinAndSelect('userAccount.officials', 'officials')
+    .leftJoinAndSelect('officials.chamaa', 'chamaaOfficial')
     .leftJoinAndSelect('userAccount.createdChamaas', 'createdChamaas')
 
     .select([
@@ -99,7 +115,8 @@ export class UsersService {
 
       'officials.position',
       'officials.roleDescription',
-      'officials.chamaa',
+      'chamaaOfficial.id',
+      'chamaaOfficial.name',
 
       'createdChamaas.chamaa',
       'createdChamaas.locationCounty',
@@ -134,6 +151,7 @@ export class UsersService {
     .leftJoinAndSelect('user.userProfile', 'userProfile')
     .leftJoinAndSelect('user.userAccount', 'userAccount')
     .leftJoinAndSelect('userAccount.officials', 'officials')
+    .leftJoinAndSelect('officials.chamaa', 'chamaaOfficial')
     .leftJoinAndSelect('userAccount.createdChamaas', 'createdChamaas')
 
     .select([
@@ -156,7 +174,8 @@ export class UsersService {
 
       'officials.position',
       'officials.roleDescription',
-      'officials.chamaa',
+      'chamaaOfficial.id',
+      'chamaaOfficial.name',
 
       'createdChamaas.chamaa',
       'createdChamaas.locationCounty',
@@ -185,6 +204,7 @@ export class UsersService {
     .leftJoinAndSelect('user.userProfile', 'userProfile')
     .leftJoinAndSelect('user.userAccount', 'userAccount')
     .leftJoinAndSelect('userAccount.officials', 'officials')
+    .leftJoinAndSelect('officials.chamaa', 'chamaaOfficial')
     .leftJoinAndSelect('userAccount.createdChamaas', 'createdChamaas')
 
     .select([
@@ -207,7 +227,9 @@ export class UsersService {
 
       'officials.position',
       'officials.roleDescription',
-      'officials.chamaa',
+      'chamaaOfficial.id',
+      'chamaaOfficial.name',
+
 
       'createdChamaas.chamaa',
       'createdChamaas.locationCounty',
@@ -238,47 +260,44 @@ export class UsersService {
   }
 
   async getUserAccountInfoByUserId(userId: string) {
-    return await this.userAccountRepository.findOne({
+    const user = await this.userAccountRepository.findOne({
       where: { user: {id: userId} },
+      relations:['user']
     });
+    console.log({user})
+    if(!user){
+      throw new NotFoundException('User Account not found')
+    }
+    return user
   }
 
-  async update(id: string, adminUpdateUserDto: AdminUpdateUserDto) {
-    const user = await this.userRepository.findOneBy({id});
-    if(!user) {
-      throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
-    }
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.findUserById(id);
 
     //ensure email is unique
-    if (adminUpdateUserDto.email) {      
-      //ensure email is unique
+    if (updateUserDto.email) {      
       const existingUser = await this.userRepository.findOne({
         where: {
-          email: adminUpdateUserDto.email,
+          email: updateUserDto.email,
           id: Not(id),
         },
       });
 
       if (existingUser) {
-        throw new ConflictException(`Email ${adminUpdateUserDto.email} is already in use.`);
+        throw new HttpException(`Email ${updateUserDto.email} is already in use.`,HttpStatus.BAD_REQUEST);
       }
 
-      user.email = adminUpdateUserDto.email;
+      user.email = updateUserDto.email;
     }
 
-
-    //// Loop through the fields to update
-    // for (const field of ['name', 'otherField', 'anotherField']) {
-    //   if (adminUpdateUserDto[field]) {
-    //     user[field] = adminUpdateUserDto[field];
-    //   }
-    // }
-
-    if (adminUpdateUserDto.password) {
+    if (updateUserDto.password) {
         const salt = await bcrypt.genSalt();
-        const hash = await bcrypt.hash(adminUpdateUserDto.password, salt);
+        const hash = await bcrypt.hash(updateUserDto.password, salt);
         user.password = hash;
     }
+
+
+    Object.assign(user, updateUserDto);
 
     const updatedUser = await this.userRepository.save(user);
     delete updatedUser.password;
@@ -286,6 +305,19 @@ export class UsersService {
     return updatedUser;
   }
 
+  async updateUserProfile(id: string, updateUserProfileDto: UpdateUserProfileDto){
+    const user = await this.findUserById(id);
+    const userProfile = await this.userProfiletRepository.findOne({
+      where: {user: {id}}
+    })
+
+    if(!userProfile){
+      throw new HttpException('User Profile not found',HttpStatus.BAD_REQUEST);
+    }
+
+    Object.assign(userProfile, updateUserProfileDto);
+    return await this.userProfiletRepository.save(userProfile);
+  }
   remove(id: string) {
     return `This action removes a #${id} user`;
   }
@@ -293,6 +325,14 @@ export class UsersService {
 
   async findUserByEmail(email: string):Promise<User | undefined>{
     return await this.userRepository.findOneBy({email})    // return await this.userRepository.findOne({where:{email}})
+  }
+
+  async findUserById(id: string){
+    const user = await this.userRepository.findOneBy({id});
+    if(!user) {
+      throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
+    }
+    return user;
   }
 
   async updateRefreshToken(id:string, hashRt:string){
@@ -317,18 +357,18 @@ export class UsersService {
     await this.userRepository.save(user)
   }
 
-  async updateUserProfile(id: string, updateUserProfileDto: UpdateUserProfileDto, profilePic: Express.Multer.File){
-    // const user = await this.userRepository.findOneBy({ id})
-    // if(!user){
-    //     throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
-    // }
+  // async updateUserProfile(id: string, updateUserProfileDto: UpdateUserProfileDto, profilePic: Express.Multer.File){
+  //   // const user = await this.userRepository.findOneBy({ id})
+  //   // if(!user){
+  //   //     throw new HttpException('User not found',HttpStatus.BAD_REQUEST);
+  //   // }
 
     
-    const uploadedImg= await this.mediaUtils.uploadToFileServer (profilePic.path)
-    // const uploadedImg= await this.mediaUtils.uploadToFileServerDirect(profilePic)
+  //   const uploadedImg= await this.mediaUtils.uploadToFileServer (profilePic.path)
+  //   // const uploadedImg= await this.mediaUtils.uploadToFileServerDirect(profilePic)
 
-    return uploadedImg;
-  } 
+  //   return uploadedImg;
+  // } 
 
 
 

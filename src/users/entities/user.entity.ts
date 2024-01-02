@@ -20,7 +20,7 @@ export class User extends ProjBaseEntity {
     @Column()
     lastName: string;
    
-    @Column()
+    @Column({unique: true})
     nationalId: number;    
 
     @Column({unique: true})

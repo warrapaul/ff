@@ -23,4 +23,7 @@ export class UserProfile extends ProjBaseEntity{
 
     @Column({nullable:true})
     idPicBack?: string;
+
+    @Column({nullable:true})
+    profilePic?: string;
 }

@@ -1,3 +1,4 @@
+import { PartialType } from "@nestjs/mapped-types";
 import { Type } from "class-transformer";
 import { IsArray, IsOptional, IsString, IsUUID, ValidateNested } from "class-validator";
 
@@ -9,6 +10,8 @@ export class OfficialPositionDto{
     @IsOptional()
     roleDescription: string;
 }
+
+
 export class CreateOfficialPositionsDto{
     @IsString()
     position: string;
@@ -21,6 +24,14 @@ export class CreateOfficialPositionsDto{
     @IsUUID()
     chamaa: string;
 }
+export class UpdateOfficialPositionDto extends PartialType(CreateOfficialPositionsDto) {
+    @IsOptional()
+    @IsString()
+    @IsUUID()
+    userAccount: string;
+}
+
+
 
 
 export class CreateMultipleOfficialPositionsDto{
@@ -33,3 +44,5 @@ export class CreateMultipleOfficialPositionsDto{
     @Type(()=> OfficialPositionDto)
     positions: OfficialPositionDto[];
 }
+
+
