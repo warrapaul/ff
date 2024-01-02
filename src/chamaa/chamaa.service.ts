@@ -7,7 +7,8 @@ import { Repository } from 'typeorm';
 import { UsersService } from 'src/users/users.service';
 import { ChamaaProfile } from './entities/chamaa-profile.entity';
 import { ChamaaOfficial } from './entities/chamaa-officials.entity';
-import { CreateMultipleOfficialPositionsDto, CreateOfficialPositionsDto, OfficialPositionDto, UpdateOfficialPositionDto } from './dto/official-positions.dto';
+import {  CreateOfficialPositionsDto,  UpdateOfficialPositionDto } from './dto/official-positions.dto';
+import { CreateMultipleOfficialPositionsDto, OfficialPositionDto, UpdateMultipleOfficialPositionsDto, UpdateOfficialPositionsDto } from './dto/official-positions-multiple.dto';
 
 @Injectable()
 export class ChamaaService {
@@ -89,7 +90,17 @@ export class ChamaaService {
       .getMany()
   }
 
-  async findChamaaById(id: string) {
+  async findChamaaById(id: string){
+    const chamaa = await this.chamaaRepository.findOneBy({id});
+    if(!chamaa){
+      throw new HttpException('Chamaa Not found', HttpStatus.BAD_REQUEST)
+    }
+
+    return chamaa
+  }
+
+
+  async findOne(id: string) {
     // const chamaa = await this.chamaaRepository.findOneBy({id})
     const chamaa = await this.chamaaRepository
       .createQueryBuilder('chamaa')
@@ -159,21 +170,9 @@ export class ChamaaService {
 
   async updateChamaa(id: string, updateChamaaDto: UpdateChamaaDto) {
     const chamaa = await this.findChamaaById(id)
-    return await this.chamaaRepository.save({...chamaa, ...updateChamaaDto})
-    
-    //alt
-
-    // if(updateChamaaDto.name !==undefined){
-    //   chamaa.name= updateChamaaDto.name
-    // }
-    // if(updateChamaaDto.description !==undefined){
-    //   chamaa.description= updateChamaaDto.description
-    // }
-    // if(updateChamaaDto.registrationNumber !==undefined){
-    //   chamaa.registrationNumber= updateChamaaDto.registrationNumber
-    // }
-
-    // return await this.chamaaRepository.save(chamaa)
+    Object.assign(chamaa, updateChamaaDto)
+    // return await this.chamaaRepository.save({...chamaa, ...updateChamaaDto})
+    return await this.chamaaRepository.save(chamaa)
 
   }
 
@@ -224,19 +223,7 @@ async createOfficialPosition(createOfficialPositionsDto:CreateOfficialPositionsD
   return this.chamaaOfficialsRepository.save(chamaaOfficialPosition)
 
 }
-async createOfficialPositions(createMultipleOfficialPositionsDto:CreateMultipleOfficialPositionsDto,id: string){
-  const chamaa = await this.findChamaaById(createMultipleOfficialPositionsDto.chamaa)
-  const positionsData: OfficialPositionDto[] = createMultipleOfficialPositionsDto.positions
 
-  const positions = positionsData.map(position => {
-    console.log(position)
-    return this.chamaaOfficialsRepository.create({...position, chamaa});
-  });
-
-  return this.chamaaOfficialsRepository.save(positions);
-
-
-}
 
 async updateOfficialPosition(positionId: string, updateOfficialPositionDto: UpdateOfficialPositionDto,id: string){
   const position = await this.getOfficialPositionById(positionId)
@@ -250,6 +237,43 @@ async updateOfficialPosition(positionId: string, updateOfficialPositionDto: Upda
   
   return await this.chamaaOfficialsRepository.save(position)
 }
+
+async createMultipleOfficialPositions(createMultipleOfficialPositionsDto:CreateMultipleOfficialPositionsDto,id: string){
+  const chamaa = await this.findChamaaById(createMultipleOfficialPositionsDto.chamaa)
+  const positionsData: OfficialPositionDto[] = createMultipleOfficialPositionsDto.positions
+
+  const positions = positionsData.map(position => {
+    console.log(position)
+    return this.chamaaOfficialsRepository.create({...position, chamaa});
+  });
+
+  return this.chamaaOfficialsRepository.save(positions);
+
+
+}
+
+async updateMultipleOfficialPositions(updateMultipleOfficialPositionsDto: UpdateMultipleOfficialPositionsDto,userId: string ){
+  const chamaa = await this.findChamaaById(updateMultipleOfficialPositionsDto.chamaa)
+  const positionsData: UpdateOfficialPositionsDto[] = updateMultipleOfficialPositionsDto.positions;
+  
+
+  const positions = await Promise.all(
+    positionsData.map(async (position) => {
+      const dbPosition = await this.getOfficialPositionById(position.positionId);
+
+      if (position.userAccount) {
+        const user = await this.userService.getUserAccountInfoByUserId(position.userAccount);
+        position.userAccount = user.id;
+      }
+
+      Object.assign(dbPosition, position);
+      return await this.chamaaOfficialsRepository.save(dbPosition);
+    })
+  );
+
+  return positions
+}
+
 
   async getOfficialPositionById(id: string){
     const position =  await this.chamaaOfficialsRepository.findOneBy({id})

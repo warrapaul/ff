@@ -3,7 +3,8 @@ import { ChamaaService } from './chamaa.service';
 import { CreateChamaaDto } from './dto/create-chamaa.dto';
 import { UpdateChamaaDto, UpdateChamaaProfile } from './dto/update-chamaa.dto';
 import { Permissions } from 'src/common/decorators/permissions.decorator';
-import { CreateMultipleOfficialPositionsDto, CreateOfficialPositionsDto, UpdateOfficialPositionDto } from './dto/official-positions.dto';
+import {  CreateOfficialPositionsDto, UpdateOfficialPositionDto } from './dto/official-positions.dto';
+import { CreateMultipleOfficialPositionsDto, UpdateMultipleOfficialPositionsDto } from './dto/official-positions-multiple.dto';
 
 @Permissions('ViewChamaa')
 @Controller('chamaa')
@@ -23,7 +24,7 @@ export class ChamaaController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.chamaaService.findChamaaById(id);
+    return this.chamaaService.findOne(id);
   }
 
 
@@ -56,15 +57,19 @@ export class ChamaaController {
   @Permissions('UpdateChamaa')
   @Post('officials/create-positions')
   createOfficialPositions(@Req() req, @Body() createMultipleOfficialPositionsDto: CreateMultipleOfficialPositionsDto) {
-    return this.chamaaService.createOfficialPositions(createMultipleOfficialPositionsDto, req.user.id);
+    return this.chamaaService.createMultipleOfficialPositions(createMultipleOfficialPositionsDto, req.user.id);
   }
-
+  
   @Permissions('UpdateChamaa')
   @Patch('officials/update-position/:positionId')
   updateOfficialPosition(@Param('positionId') positionId: string,@Req() req, @Body() updateOfficialPositionDto: UpdateOfficialPositionDto){
-    console.log({'req user id': req.user.id})
     return this.chamaaService.updateOfficialPosition(positionId, updateOfficialPositionDto, req.user.id)
   }
 
+  @Permissions('UpdateChamaa')
+  @Patch('officials/update-positions')
+  updateMultipleOfficialPositions(@Req() req, @Body() updateMultipleOfficialPositionsDto: UpdateMultipleOfficialPositionsDto){
+    return this.chamaaService.updateMultipleOfficialPositions(updateMultipleOfficialPositionsDto, req.user.id)
+  }
 
 }
