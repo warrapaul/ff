@@ -3,40 +3,27 @@ import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import {  TransactionDto } from './dto/transactions-deposit.dto';
+import { CheckAccSummaryDto } from './dto/check-acc-summary.dto';
 
 @Controller('transactions')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
-
-  @Post()
-  create(@Body() createTransactionDto: CreateTransactionDto) {
-    return this.transactionsService.create(createTransactionDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.transactionsService.findAll();
-  }
-
 
   @Post('deposit')
   deposit(@Body() transactionDto: TransactionDto, @Req() req){
     return this.transactionsService.deposit(transactionDto, req.user.id)
   }
 
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.transactionsService.findOne(+id);
+  @Post('withdraw')
+  withdraw(@Body() transactionDto: TransactionDto, @Req() req){
+    return this.transactionsService.withdraw(transactionDto, req.user.id)
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto) {
-    return this.transactionsService.update(+id, updateTransactionDto);
+  @Post('check-balance')
+  checkBalance(@Body() checkAccSummaryDto: CheckAccSummaryDto, @Req() req){
+    return this.transactionsService.checkAccountSummary(checkAccSummaryDto, req.user.id)
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.transactionsService.remove(+id);
-  }
+
+
 }
