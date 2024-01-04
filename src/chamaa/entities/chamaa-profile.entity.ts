@@ -23,4 +23,7 @@ export class ChamaaProfile extends ProjBaseEntity {
     @Column({nullable: true})
     locationWard?: string;
 
+    @Column({nullable: true})
+    profilePic?: string;
+
 }

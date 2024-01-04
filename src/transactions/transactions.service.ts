@@ -104,10 +104,12 @@ export class TransactionsService {
       .createQueryBuilder('accSummary')
       .leftJoinAndSelect('accSummary.user','user')
       .leftJoinAndSelect('accSummary.chamaa','chamaa')
+      .leftJoinAndSelect('chamaa.chamaaProfile','chamaaProfile')
       .select([
         'accSummary.currentBalance',
         'user.id', 'user.firstName','user.middleName','user.lastName','user.phoneNumber',
-        'chamaa.id', 'chamaa.name', 'chamaa.description'
+        'chamaa.id', 'chamaa.name', 'chamaa.description',
+        'chamaaProfile.profilePic'
       ])
       .where('user.id = :userId',{userId})
       .andWhere('chamaa.id = :chamaaId',{chamaaId})
