@@ -53,3 +53,14 @@ export default registerAs('database', () => ({
 //         await queryRunner.query(`ALTER TABLE \`user\` MODIFY COLUMN \`nationalId\` varchar(255)`);
 //     }
 // }
+
+
+
+//-----------------RENAME COLUMNS
+//up
+//await queryRunner.query(`ALTER TABLE "transaction" RENAME COLUMN "trasactionReference" TO "transactionReference"`);
+//down
+//await queryRunner.query(`ALTER TABLE "transaction" RENAME COLUMN "transactionReference" TO "trasactionReference"`);
+
+
+// npm run migration:run

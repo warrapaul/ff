@@ -15,5 +15,6 @@ import { UsersModule } from 'src/users/users.module';
   ],
   controllers: [ChamaaController],
   providers: [ChamaaService],
+  exports:[ChamaaService]
 })
 export class ChamaaModule {}

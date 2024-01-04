@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import {  TransactionDto } from './dto/transactions-deposit.dto';
 
 @Controller('transactions')
 export class TransactionsController {
@@ -16,6 +17,13 @@ export class TransactionsController {
   findAll() {
     return this.transactionsService.findAll();
   }
+
+
+  @Post('deposit')
+  deposit(@Body() transactionDto: TransactionDto, @Req() req){
+    return this.transactionsService.deposit(transactionDto, req.user.id)
+  }
+
 
   @Get(':id')
   findOne(@Param('id') id: string) {
