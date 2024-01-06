@@ -3,13 +3,16 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import {  TransactionDto } from './dto/transactions-deposit.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { TransactionTbl } from './entities/transaction.entity';
 import { UsersService } from 'src/users/users.service';
 import { ChamaaService } from 'src/chamaa/chamaa.service';
 import { TransactionTypeEnum } from './enums/transactions.enums';
 import { UserAccountSummary } from './entities/user-account-summary.entity';
 import { CheckAccSummaryDto } from './dto/check-acc-summary.dto';
+import { InitializeAccountSummaryInterface } from './interfaces/initialize-account-summary.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { AccountSummaryInterface } from './interfaces/account-summary.interface';
 
 @Injectable()
 export class TransactionsService {
@@ -19,14 +22,61 @@ export class TransactionsService {
     @InjectRepository(UserAccountSummary)
     private readonly userAccountSummaryRepository: Repository<UserAccountSummary>,
     private readonly usersService:UsersService,
-    private readonly chamaaService:ChamaaService
-
+    private readonly chamaaService:ChamaaService,
+    private dataSource: DataSource,
+    private eventEmitter: EventEmitter2
   ){}
   
+  // async deposit(transactionDto: TransactionDto, userId: string){
+  //   const queryRunner = this.dataSource.createQueryRunner();
+  //   await queryRunner.startTransaction();
+  //   try {
+  //             const chamaa = await this.chamaaService.findChamaaById(transactionDto.chamaa);
+  //             const user = await this.usersService.findUserById(transactionDto.user)
+    
+  //             const depositTrans =  this.transactionRepository.create({
+  //               ...transactionDto,
+  //               user,
+  //               chamaa,
+  //               transactionType: TransactionTypeEnum.DEPOSIT,
+  //             });
+  //             const deposit = await this.transactionRepository.save(depositTrans);
+                
+  //             const userAccountSummary = await this.findAccSummaryByUserNChamaaId({user:transactionDto.user, chamaa:transactionDto.chamaa});
+             
+  //             let updatedAccountSummary: UserAccountSummary;
+  //             if (userAccountSummary) {
+  //               const amnt = userAccountSummary.currentBalance + transactionDto.amount;
+  //               updatedAccountSummary= await this.updateAccountSummary(userAccountSummary.id, amnt);
+  //             }else {
+  //               updatedAccountSummary = await this.initializeAccountSummary({
+  //                 user,
+  //                 chamaa,
+  //                 currentBalance: transactionDto.amount
+  //               });
+  //             }
+    
+  //         await queryRunner.commitTransaction();
+          
+  //         //emit deposit transaction event
+  //         this.eventEmitter.emit('transaction.created.deposit', {transaction: transactionDto, currentAccSummary: updatedAccountSummary});
+
+  //         return await this.findAccountSummaryByAccId(updatedAccountSummary.id)
+
+  //   } catch (error) {
+  //     await queryRunner.rollbackTransaction();
+  //     throw new HttpException(`Error occurred during deposit: ${error}`, HttpStatus.INTERNAL_SERVER_ERROR)
+  //   }finally{
+  //     await queryRunner.release()
+  //   }
+
+  // }
+
   async deposit(transactionDto: TransactionDto, userId: string){
     try{
           const chamaa = await this.chamaaService.findChamaaById(transactionDto.chamaa);
           const user = await this.usersService.findUserById(transactionDto.user)
+
           const depositTrans =  this.transactionRepository.create({
             ...transactionDto,
             user,
@@ -35,19 +85,33 @@ export class TransactionsService {
           });
           const deposit = await this.transactionRepository.save(depositTrans);
 
+
+          
           const userAccountSummary = await this.findAccSummaryByUserNChamaaId({user:transactionDto.user, chamaa:transactionDto.chamaa});
+         
+          let updatedAccountSummary: UserAccountSummary;
           if (userAccountSummary) {
             const amnt = userAccountSummary.currentBalance + transactionDto.amount;
-            const updatedAcc = await this.updateAccountSummary(userAccountSummary.id, amnt);
-            return await this.findAccountSummaryByAccId(updatedAcc.id)
+            updatedAccountSummary= await this.updateAccountSummary(userAccountSummary.id, amnt);
           }else {
-            const newAccountSummary = this.userAccountSummaryRepository.create({
+            updatedAccountSummary = await this.initializeAccountSummary({
               user,
               chamaa,
-              currentBalance: transactionDto.amount,
+              currentBalance: transactionDto.amount
             });
-            return await this.userAccountSummaryRepository.save(newAccountSummary);
           }
+
+
+          const currentAccSummary = await this.findAccountSummaryByAccId(updatedAccountSummary.id)
+
+
+          //emit deposit transaction event
+          this.eventEmitter.emit('transaction.created.deposit', {transaction: transactionDto, currentAccSummary});
+
+
+
+          return currentAccSummary
+
     }catch(error){
       throw new HttpException(`Error occurred during deposit: ${error}`, HttpStatus.INTERNAL_SERVER_ERROR)
     }
@@ -76,7 +140,12 @@ export class TransactionsService {
       
       const amnt = userAccountSummary.currentBalance - transactionDto.amount;
       const updatedAcc = await this.updateAccountSummary(userAccountSummary.id, amnt);
-      return await this.findAccountSummaryByAccId(updatedAcc.id)
+      const currentAccSummary = await this.findAccountSummaryByAccId(updatedAcc.id)
+      
+      //emit deposit transaction event
+      this.eventEmitter.emit('transaction.created.deposit', {transaction: transactionDto, currentAccSummary});
+
+      return currentAccSummary
     }catch(error){
       throw new HttpException(`Error occurred during withdrawal: ${error}`, HttpStatus.INTERNAL_SERVER_ERROR)
     }
@@ -96,46 +165,87 @@ export class TransactionsService {
 
 
   
-  async findAccSummaryByUserNChamaaId(checkAccSummaryDto: CheckAccSummaryDto){
+  async findAccSummaryByUserNChamaaId(checkAccSummaryDto: CheckAccSummaryDto): Promise<AccountSummaryInterface | undefined>{
     const userId = checkAccSummaryDto.user;
     const chamaaId = checkAccSummaryDto.chamaa;
 
-    return await this. userAccountSummaryRepository
+    const acc =  await this. userAccountSummaryRepository
       .createQueryBuilder('accSummary')
       .leftJoinAndSelect('accSummary.user','user')
       .leftJoinAndSelect('accSummary.chamaa','chamaa')
       .leftJoinAndSelect('chamaa.chamaaProfile','chamaaProfile')
       .select([
-        'accSummary.currentBalance',
+        'accSummary.id','accSummary.currentBalance',
         'user.id', 'user.firstName','user.middleName','user.lastName','user.phoneNumber',
         'chamaa.id', 'chamaa.name', 'chamaa.description',
         'chamaaProfile.profilePic'
       ])
       .where('user.id = :userId',{userId})
       .andWhere('chamaa.id = :chamaaId',{chamaaId})
-      .getOne();    
+      .getOne();   
+
+      if(!acc){
+        throw new HttpException('Account Not found', HttpStatus.BAD_REQUEST)
+      }
+
+      return {
+        id:acc.id,
+        currentBalance: acc.currentBalance,
+        userId: acc.user.id,
+        firstName: acc.user.firstName,
+        middleName: acc.user.middleName,
+        lastName: acc.user.lastName,
+        phoneNumber: acc.user.phoneNumber,
+        chamaaId: acc.chamaa.id, 
+        chamaaName: acc.chamaa.name,
+        chamaaDescription: acc.chamaa.description,
+        chamaaProfile: acc.chamaa.chamaaProfile 
+      };
   }
 
-  async findAccountSummaryByAccId(id: string){
+  async findAccountSummaryByAccId(id: string): Promise<AccountSummaryInterface | undefined>{
     const acc= await this. userAccountSummaryRepository
     .createQueryBuilder('accSummary')
     .leftJoinAndSelect('accSummary.user','user')
     .leftJoinAndSelect('accSummary.chamaa','chamaa')
+    .leftJoinAndSelect('chamaa.chamaaProfile','chamaaProfile')
     .where('accSummary.id = :id',{id})
     .select([
-      'accSummary.currentBalance',
+      'accSummary.id','accSummary.currentBalance',
       'user.id', 'user.firstName','user.middleName','user.lastName','user.phoneNumber',
-      'chamaa.id', 'chamaa.name', 'chamaa.description'
+      'chamaa.id', 'chamaa.name', 'chamaa.description',
+      'chamaaProfile.profilePic'
     ])
     .getOne();
     
     if(!acc){
       throw new HttpException('Account Not found', HttpStatus.BAD_REQUEST)
     }
-    return acc;
+    return {
+      id:acc.id,
+      currentBalance: acc.currentBalance,
+      userId: acc.user.id,
+      firstName: acc.user.firstName,
+      middleName: acc.user.middleName,
+      lastName: acc.user.lastName,
+      phoneNumber: acc.user.phoneNumber,
+      chamaaId: acc.chamaa.id, 
+      chamaaName: acc.chamaa.name,
+      chamaaDescription: acc.chamaa.description,
+      chamaaProfile: acc.chamaa.chamaaProfile 
+    };
   }
   
+ 
+
+  async initializeAccountSummary(accountSummary: InitializeAccountSummaryInterface){
+
+    const newAccountSummary = this.userAccountSummaryRepository.create(accountSummary);
+    return await this.userAccountSummaryRepository.save(newAccountSummary);
+  }
+
   async updateAccountSummary(id: string, amount: number){
+
     const acc = await this.userAccountSummaryRepository.findOneBy({id});
     if(!acc){
       throw new HttpException('Account Not found', HttpStatus.BAD_REQUEST)
@@ -143,6 +253,5 @@ export class TransactionsService {
     acc.currentBalance = amount;
     return await this.userAccountSummaryRepository.save(acc)
   }
-
  
 }

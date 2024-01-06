@@ -6,6 +6,7 @@ import { ChamaaModule } from 'src/chamaa/chamaa.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TransactionTbl } from './entities/transaction.entity';
 import { UserAccountSummary } from './entities/user-account-summary.entity';
+import { TranactionCreatedListener } from './listeners/transaction-created.listener';
 
 @Module({
   imports:[
@@ -14,6 +15,6 @@ import { UserAccountSummary } from './entities/user-account-summary.entity';
     ChamaaModule
   ],
   controllers: [TransactionsController],
-  providers: [TransactionsService],
+  providers: [TransactionsService,TranactionCreatedListener],
 })
 export class TransactionsModule {}
