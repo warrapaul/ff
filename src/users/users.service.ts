@@ -28,6 +28,8 @@ export class UsersService {
     private readonly mediaUtils: MediaUtils
 
   ){}
+
+  //TO DO : USE TRANSACTIONS WHEN CREATING USER, ACC, PROFILE 
   async create(createUserDto: CreateUserDto) {
     const existingUser = await this.findUserByEmail(createUserDto.email);
     if (existingUser) {
@@ -260,6 +262,7 @@ export class UsersService {
   }
 
   async getUserAccountInfoByUserId(userId: string) {
+    console.log({userId})
     const user = await this.userAccountRepository.findOne({
       where: { user: {id: userId} },
       relations:['user']

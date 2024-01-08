@@ -27,95 +27,98 @@ export class TransactionsService {
     private eventEmitter: EventEmitter2
   ){}
   
-  // async deposit(transactionDto: TransactionDto, userId: string){
-  //   const queryRunner = this.dataSource.createQueryRunner();
-  //   await queryRunner.startTransaction();
-  //   try {
-  //             const chamaa = await this.chamaaService.findChamaaById(transactionDto.chamaa);
-  //             const user = await this.usersService.findUserById(transactionDto.user)
-    
-  //             const depositTrans =  this.transactionRepository.create({
-  //               ...transactionDto,
-  //               user,
-  //               chamaa,
-  //               transactionType: TransactionTypeEnum.DEPOSIT,
-  //             });
-  //             const deposit = await this.transactionRepository.save(depositTrans);
-                
-  //             const userAccountSummary = await this.findAccSummaryByUserNChamaaId({user:transactionDto.user, chamaa:transactionDto.chamaa});
-             
-  //             let updatedAccountSummary: UserAccountSummary;
-  //             if (userAccountSummary) {
-  //               const amnt = userAccountSummary.currentBalance + transactionDto.amount;
-  //               updatedAccountSummary= await this.updateAccountSummary(userAccountSummary.id, amnt);
-  //             }else {
-  //               updatedAccountSummary = await this.initializeAccountSummary({
-  //                 user,
-  //                 chamaa,
-  //                 currentBalance: transactionDto.amount
-  //               });
-  //             }
-    
-  //         await queryRunner.commitTransaction();
-          
-  //         //emit deposit transaction event
-  //         this.eventEmitter.emit('transaction.created.deposit', {transaction: transactionDto, currentAccSummary: updatedAccountSummary});
-
-  //         return await this.findAccountSummaryByAccId(updatedAccountSummary.id)
-
-  //   } catch (error) {
-  //     await queryRunner.rollbackTransaction();
-  //     throw new HttpException(`Error occurred during deposit: ${error}`, HttpStatus.INTERNAL_SERVER_ERROR)
-  //   }finally{
-  //     await queryRunner.release()
-  //   }
-
-  // }
-
   async deposit(transactionDto: TransactionDto, userId: string){
-    try{
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
           const chamaa = await this.chamaaService.findChamaaById(transactionDto.chamaa);
           const user = await this.usersService.findUserById(transactionDto.user)
-
-          const depositTrans =  this.transactionRepository.create({
+          
+          await queryRunner.manager.save(TransactionTbl,{
             ...transactionDto,
             user,
             chamaa,
             transactionType: TransactionTypeEnum.DEPOSIT,
-          });
-          const deposit = await this.transactionRepository.save(depositTrans);
+          })
 
 
-          
           const userAccountSummary = await this.findAccSummaryByUserNChamaaId({user:transactionDto.user, chamaa:transactionDto.chamaa});
-         
           let updatedAccountSummary: UserAccountSummary;
           if (userAccountSummary) {
             const amnt = userAccountSummary.currentBalance + transactionDto.amount;
-            updatedAccountSummary= await this.updateAccountSummary(userAccountSummary.id, amnt);
+            userAccountSummary.currentBalance = amnt;
+
+            updatedAccountSummary= await queryRunner.manager.save(UserAccountSummary,userAccountSummary )
           }else {
-            updatedAccountSummary = await this.initializeAccountSummary({
+            updatedAccountSummary = await queryRunner.manager.save(UserAccountSummary,{
               user,
               chamaa,
               currentBalance: transactionDto.amount
-            });
+            })            
           }
 
 
+          await queryRunner.commitTransaction();
           const currentAccSummary = await this.findAccountSummaryByAccId(updatedAccountSummary.id)
-
-
+         
           //emit deposit transaction event
           this.eventEmitter.emit('transaction.created.deposit', {transaction: transactionDto, currentAccSummary});
-
-
-
+        
           return currentAccSummary
-
-    }catch(error){
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
       throw new HttpException(`Error occurred during deposit: ${error}`, HttpStatus.INTERNAL_SERVER_ERROR)
+    } finally{
+      await queryRunner.release();
     }
-  }
+    
+  } 
+
+  // async deposit(transactionDto: TransactionDto, userId: string){
+  //   try{
+  //         const chamaa = await this.chamaaService.findChamaaById(transactionDto.chamaa);
+  //         const user = await this.usersService.findUserById(transactionDto.user)
+
+  //         const depositTrans =  this.transactionRepository.create({
+  //           ...transactionDto,
+  //           user,
+  //           chamaa,
+  //           transactionType: TransactionTypeEnum.DEPOSIT,
+  //         });
+  //         const deposit = await this.transactionRepository.save(depositTrans);
+
+
+          
+  //         const userAccountSummary = await this.findAccSummaryByUserNChamaaId({user:transactionDto.user, chamaa:transactionDto.chamaa});
+         
+  //         let updatedAccountSummary: UserAccountSummary;
+  //         if (userAccountSummary) {
+  //           const amnt = userAccountSummary.currentBalance + transactionDto.amount;
+  //           updatedAccountSummary= await this.updateAccountSummary(userAccountSummary.id, amnt);
+  //         }else {
+  //           updatedAccountSummary = await this.initializeAccountSummary({
+  //             user,
+  //             chamaa,
+  //             currentBalance: transactionDto.amount
+  //           });
+  //         }
+
+
+  //         const currentAccSummary = await this.findAccountSummaryByAccId(updatedAccountSummary.id)
+
+
+  //         //emit deposit transaction event
+  //         this.eventEmitter.emit('transaction.created.deposit', {transaction: transactionDto, currentAccSummary});
+
+
+
+  //         return currentAccSummary
+
+  //   }catch(error){
+  //     throw new HttpException(`Error occurred during deposit: ${error}`, HttpStatus.INTERNAL_SERVER_ERROR)
+  //   }
+  // }
 
   async withdraw(transactionDto: TransactionDto, userId: string){
    try{
@@ -153,15 +156,66 @@ export class TransactionsService {
   }
 
 
-  async checkAccountSummary(checkAccSummaryDto: CheckAccSummaryDto, id: string){  
+  // async checkAccountSummary(checkAccSummaryDto: CheckAccSummaryDto, id: string){  
    
-    const acc =  await this.findAccSummaryByUserNChamaaId(checkAccSummaryDto)    
-    if(!acc){
-      throw new HttpException('Account Not found', HttpStatus.BAD_REQUEST)
-    }
-    return acc;
-  }
+  //   const acc =  await this.findAccSummaryByUserNChamaaId(checkAccSummaryDto)    
+  //   if(!acc){
+  //     throw new HttpException('Account Not found', HttpStatus.BAD_REQUEST)
+  //   }
+  //   return acc;
+  // }
 
+
+  async checkAccountSummary(checkAccSummaryDto: CheckAccSummaryDto, id: string){  
+    const userId = checkAccSummaryDto.user;
+    const chamaaId = checkAccSummaryDto.chamaa;
+
+    const acc =  await this. userAccountSummaryRepository
+      .createQueryBuilder('accSummary')
+      .leftJoinAndSelect('accSummary.user','user')
+      .leftJoinAndSelect('accSummary.chamaa','chamaa')
+      .leftJoinAndSelect('chamaa.chamaaProfile','chamaaProfile')
+      .select([
+        'accSummary.id','accSummary.currentBalance',
+        'user.id', 'user.firstName','user.middleName','user.lastName','user.phoneNumber',
+        'chamaa.id', 'chamaa.name', 'chamaa.description',
+        'chamaaProfile.profilePic'
+      ])
+      .where('user.id = :userId',{userId})
+      .andWhere('chamaa.id = :chamaaId',{chamaaId})
+      .getOne();   
+
+      if(!acc){
+        return {
+          // id:null,
+          // currentBalance: acc.currentBalance,
+          // userId: userId.id,
+          // firstName: acc.user.firstName,
+          // middleName: acc.user.middleName,
+          // lastName: acc.user.lastName,
+          // phoneNumber: acc.user.phoneNumber,
+          // chamaaId: acc.chamaa.id, 
+          // chamaaName: acc.chamaa.name,
+          // chamaaDescription: acc.chamaa.description,
+          // chamaaProfile: acc.chamaa.chamaaProfile 
+          currentBalance: 0
+        }
+      }
+
+      return {
+        id:acc.id,
+        currentBalance: acc.currentBalance,
+        userId: acc.user.id,
+        firstName: acc.user.firstName,
+        middleName: acc.user.middleName,
+        lastName: acc.user.lastName,
+        phoneNumber: acc.user.phoneNumber,
+        chamaaId: acc.chamaa.id, 
+        chamaaName: acc.chamaa.name,
+        chamaaDescription: acc.chamaa.description,
+        chamaaProfile: acc.chamaa.chamaaProfile 
+      };
+  }
 
 
   
@@ -185,7 +239,8 @@ export class TransactionsService {
       .getOne();   
 
       if(!acc){
-        throw new HttpException('Account Not found', HttpStatus.BAD_REQUEST)
+        //throw new HttpException('Account Not found', HttpStatus.BAD_REQUEST)
+        return null
       }
 
       return {

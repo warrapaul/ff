@@ -22,6 +22,9 @@ export class ChamaaService {
 
     private readonly userService: UsersService
   ){}
+
+    //TO DO : USE TRANSACTIONS WHEN CREATING CHAMAA, PROFILE 
+
   async create(createChamaaDto: CreateChamaaDto, userId: string) {
     const chamaaRegExists = await this.getChamaaByRegistrationNumber(createChamaaDto.registrationNumber);
     if(chamaaRegExists){
