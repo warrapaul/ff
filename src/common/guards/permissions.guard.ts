@@ -6,8 +6,14 @@ import { PERMISSIONS_KEY } from '../../common/decorators/permissions.decorator';
 @Injectable()
 export class PermissionsGuard implements CanActivate {
   constructor(private reflector:Reflector){}
+  
   canActivate(context: ExecutionContext): boolean{
-    const requiredPermissions = this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
+    // const requiredPermissions = this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
+    //   context.getHandler(),
+    //   context.getClass(),
+    // ]);
+
+    const requiredPermissions = this.reflector.getAllAndMerge<string[]>(PERMISSIONS_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
